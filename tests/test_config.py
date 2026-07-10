@@ -81,6 +81,64 @@ class ConfigTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Missing required"):
                 collect_config(config_path, interactive=False)
 
+    def test_telegram_configuration_is_optional(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [project]
+                    identifier = "example-project"
+                    display_name = "Example Project"
+                    description = "An example project."
+                    topics = ["example"]
+
+                    [gitlab]
+                    token = "gitlab-token"
+
+                    [github]
+                    token = "github-token"
+                    mirror_pat = "mirror-token"
+                    """,
+                ),
+                encoding="utf-8",
+            )
+            config_path.chmod(0o600)
+
+            config = collect_config(config_path, interactive=False)
+
+        self.assertIsNone(config.telegram)
+
+    def test_incomplete_telegram_configuration_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [project]
+                    identifier = "example-project"
+                    display_name = "Example Project"
+                    description = "An example project."
+                    topics = ["example"]
+
+                    [gitlab]
+                    token = "gitlab-token"
+
+                    [github]
+                    token = "github-token"
+                    mirror_pat = "mirror-token"
+
+                    [telegram]
+                    chat_id = "@example"
+                    """,
+                ),
+                encoding="utf-8",
+            )
+            config_path.chmod(0o600)
+
+            with self.assertRaisesRegex(ValueError, "telegram.bot_token"):
+                collect_config(config_path, interactive=False)
+
     @patch("project_initializer.config.pwinput", return_value="secret-value")
     def test_secret_prompt_masks_input_with_asterisks(self, pwinput: object) -> None:
         value = _prompt_if_missing(None, "Authentication token", secret=True)

@@ -8,7 +8,7 @@ from __future__ import annotations
 import unittest
 from unittest.mock import MagicMock, patch
 
-from project_initializer.automation import initialize_project
+from project_initializer.automation import describe_dry_run, initialize_project
 from project_initializer.config import (
     GitHubConfig,
     GitLabConfig,
@@ -113,8 +113,40 @@ class AutomationTests(unittest.TestCase):
         gitlab_client.create_project.assert_not_called()
         github_client.create_repository.assert_not_called()
 
+    @patch("project_initializer.automation.GitHubClient")
+    @patch("project_initializer.automation.GitLabClient")
+    def test_initialize_project_skips_telegram_when_disabled(
+        self,
+        gitlab_client_class: object,
+        github_client_class: object,
+    ) -> None:
+        config = _config(telegram=False)
+        gitlab_client = gitlab_client_class.return_value  # type: ignore[attr-defined]
+        gitlab_client.validate_token.return_value = "gitlab-owner"
+        gitlab_client.project_exists.return_value = False
+        gitlab_client.create_project.return_value = GitLabProject(
+            id=1,
+            web_url="https://gitlab.com/example/example-project",
+        )
+        github_client = github_client_class.return_value  # type: ignore[attr-defined]
+        github_client.get_authenticated_username.return_value = "example"
+        github_client.repository_exists.return_value = False
+        github_client.create_repository.return_value = GitHubRepository(
+            owner="example",
+            name="example-project",
+            html_url="https://github.com/example/example-project",
+            clone_url="https://github.com/example/example-project.git",
+        )
 
-def _config() -> InitializerConfig:
+        initialize_project(config)
+
+        gitlab_client.configure_telegram_integration.assert_not_called()
+        github_client.set_actions_variable.assert_not_called()
+        github_client.set_actions_secret.assert_not_called()
+        self.assertFalse(any("Telegram" in item for item in describe_dry_run(config)))
+
+
+def _config(*, telegram: bool = True) -> InitializerConfig:
     return InitializerConfig(
         project=ProjectConfig(
             identifier="example-project",
@@ -128,7 +160,11 @@ def _config() -> InitializerConfig:
             token="github-token",
             mirror_pat="mirror-token",
         ),
-        telegram=TelegramConfig(chat_id="@example", bot_token="bot-token"),
+        telegram=(
+            TelegramConfig(chat_id="@example", bot_token="bot-token")
+            if telegram
+            else None
+        ),
     )
 
 

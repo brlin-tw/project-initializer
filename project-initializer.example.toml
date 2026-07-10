@@ -23,6 +23,7 @@ api_url = "https://api.github.com"
 # token = "github_pat_..."
 # mirror_pat = "github_pat_..."
 
+# Optional: remove this table to skip Telegram integration.
 [telegram]
 chat_id = "@example_channel"
 # bot_token = "123456:ABCDEF..."

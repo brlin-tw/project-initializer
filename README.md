@@ -11,8 +11,9 @@ Before using the utility, ensure that you have the following:
 
 * A POSIX-compatible operating system with Python 3.10 or later, the Python
   `venv` module, and `pip`.
-* Network access to the configured GitLab and GitHub API endpoints.  The GitLab
-  instance must also be able to reach the Telegram Bot API.
+* Network access to the configured GitLab and GitHub API endpoints.  When
+  Telegram integration is enabled, the GitLab instance must also be able to
+  reach the Telegram Bot API.
 * A GitLab.com account, or an account on a GitLab 18.10 or later Self-Managed
   or Dedicated instance.  The account must be allowed to create public
   projects.
@@ -25,9 +26,10 @@ Before using the utility, ensure that you have the following:
 
   Both tokens must have the repository access and permissions documented in
   the [GitHub permissions section](#github).
-* A Telegram bot API token and the identifier of the target channel or group.
-  Add the bot to the target chat before running the utility.  For a channel,
-  make the bot an administrator and grant it permission to post messages.
+* To optionally enable Telegram integration, a Telegram bot API token and the
+  identifier of the target channel or group.  Add the bot to the target chat
+  before running the utility.  For a channel, make the bot an administrator and
+  grant it permission to post messages.
 * A project identifier that is available in both the GitLab and GitHub
   accounts.  The utility creates new repositories and does not reuse existing
   ones.
@@ -80,9 +82,9 @@ Note that this applies to the source installation, adapt the flow accordingly if
     ```
 
    The utility creates public GitLab and GitHub repositories under the
-   authenticated token owners, configures Telegram notifications, stores the
-   Telegram values in GitHub Actions secrets/variables, and configures GitLab to
-   push-mirror to GitHub.
+   authenticated token owners, optionally configures Telegram notifications
+   and stores their values in GitHub Actions secrets/variables, and configures
+   GitLab to push-mirror to GitHub.
 
 ## Required permissions
 
@@ -104,7 +106,7 @@ The following fine-grained permissions are required for the GitLab personal acce
 * Group and project
     + Integrations
         - Integration:
-            * Update: To create a new Telegram integration
+            * Update: To create a new Telegram integration when configured
     + Project features
         - Remote Mirror
             * Create: To create a new remote mirror
@@ -134,8 +136,8 @@ created after the token was issued.  The following repository permissions are
 required:
 
 * Administration: Read and write: To create the mirror repository, update its details, and replace its topics
-* Variables: Read and write: To create or update the GitHub Actions repository variable
-* Secrets: Read and write: To create or update the GitHub Actions repository secret
+* Variables: Read and write: To create or update the GitHub Actions repository variable when Telegram integration is configured
+* Secrets: Read and write: To create or update the GitHub Actions repository secret when Telegram integration is configured
 
 The fine-grained personal access token for repository mirroring must also have
 access to all repositories so that it can push to repositories created after

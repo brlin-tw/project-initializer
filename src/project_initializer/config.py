@@ -57,7 +57,7 @@ class InitializerConfig:
     project: ProjectConfig
     gitlab: GitLabConfig
     github: GitHubConfig
-    telegram: TelegramConfig
+    telegram: TelegramConfig | None
 
 
 def load_config_data(path: Path) -> dict[str, Any]:
@@ -87,6 +87,7 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
     project = _table(data, "project")
     gitlab = _table(data, "gitlab")
     github = _table(data, "github")
+    telegram_enabled = "telegram" in data
     telegram = _table(data, "telegram")
 
     identifier = _value(project, "identifier")
@@ -122,15 +123,16 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
             "GitHub personal access token for repository mirroring",
             secret=True,
         )
-        telegram_chat_id = _prompt_if_missing(
-            telegram_chat_id,
-            "Telegram channel/group identifier",
-        )
-        telegram_bot_token = _prompt_if_missing(
-            telegram_bot_token,
-            "Telegram bot token",
-            secret=True,
-        )
+        if telegram_enabled:
+            telegram_chat_id = _prompt_if_missing(
+                telegram_chat_id,
+                "Telegram channel/group identifier",
+            )
+            telegram_bot_token = _prompt_if_missing(
+                telegram_bot_token,
+                "Telegram bot token",
+                secret=True,
+            )
 
     missing = _missing_values(
         {
@@ -141,8 +143,14 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
             "gitlab.token": gitlab_token,
             "github.token": github_token,
             "github.mirror_pat": github_mirror_pat,
-            "telegram.chat_id": telegram_chat_id,
-            "telegram.bot_token": telegram_bot_token,
+            **(
+                {
+                    "telegram.chat_id": telegram_chat_id,
+                    "telegram.bot_token": telegram_bot_token,
+                }
+                if telegram_enabled
+                else {}
+            ),
         },
     )
     if missing:
@@ -163,9 +171,13 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
             token=str(github_token),
             mirror_pat=str(github_mirror_pat),
         ),
-        telegram=TelegramConfig(
-            chat_id=str(telegram_chat_id),
-            bot_token=str(telegram_bot_token),
+        telegram=(
+            TelegramConfig(
+                chat_id=str(telegram_chat_id),
+                bot_token=str(telegram_bot_token),
+            )
+            if telegram_enabled
+            else None
         ),
     )
 

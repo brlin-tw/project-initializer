@@ -165,21 +165,28 @@ def _validate_project_availability(
 
 def describe_dry_run(config: InitializerConfig) -> list[str]:
     validate_config(config)
-    return [
+    operations = [
         "Validate project identifier, display name, and topics.",
         f"Create public GitLab project {config.project.identifier}.",
-        "Configure GitLab Telegram integration with all supported triggers.",
         "Create public empty GitHub repository "
         f"{config.project.identifier} with issues, projects, wiki, and pull "
         "requests disabled.",
         "Replace GitHub repository topics.",
-        "Create or update GitHub Actions repository variable "
-        "TELEGRAM_CHAT_ID_CI.",
-        "Create or update GitHub Actions repository secret "
-        "TELEGRAM_BOT_API_TOKEN_CI.",
         "Configure GitLab push mirror to the GitHub repository.",
         "Set GitHub repository homepage to the GitLab project URL.",
     ]
+    if config.telegram is not None:
+        operations[2:2] = [
+            "Configure GitLab Telegram integration with all supported triggers.",
+        ]
+        operations[5:5] = [
+            "Create or update GitHub Actions repository variable "
+            "TELEGRAM_CHAT_ID_CI.",
+            "Create or update GitHub Actions repository secret "
+            "TELEGRAM_BOT_API_TOKEN_CI.",
+        ]
+
+    return operations
 
 
 def _configure_github_repository(
@@ -192,25 +199,26 @@ def _configure_github_repository(
 ) -> None:
     _report_progress(progress, "Replacing GitHub repository topics.")
     github_client.replace_topics(repository, config.project.topics)
-    _report_progress(
-        progress,
-        "Creating or updating GitHub Actions variable TELEGRAM_CHAT_ID_CI.",
-    )
-    github_client.set_actions_variable(
-        repository,
-        name="TELEGRAM_CHAT_ID_CI",
-        value=config.telegram.chat_id,
-    )
-    _report_progress(
-        progress,
-        "Creating or updating GitHub Actions secret "
-        "TELEGRAM_BOT_API_TOKEN_CI.",
-    )
-    github_client.set_actions_secret(
-        repository,
-        name="TELEGRAM_BOT_API_TOKEN_CI",
-        value=config.telegram.bot_token,
-    )
+    if config.telegram is not None:
+        _report_progress(
+            progress,
+            "Creating or updating GitHub Actions variable TELEGRAM_CHAT_ID_CI.",
+        )
+        github_client.set_actions_variable(
+            repository,
+            name="TELEGRAM_CHAT_ID_CI",
+            value=config.telegram.chat_id,
+        )
+        _report_progress(
+            progress,
+            "Creating or updating GitHub Actions secret "
+            "TELEGRAM_BOT_API_TOKEN_CI.",
+        )
+        github_client.set_actions_secret(
+            repository,
+            name="TELEGRAM_BOT_API_TOKEN_CI",
+            value=config.telegram.bot_token,
+        )
     _report_progress(progress, "Updating GitHub repository details.")
     github_client.update_repository_details(
         repository,
@@ -227,12 +235,13 @@ def _configure_gitlab_project(
     config: InitializerConfig,
     progress: ProgressReporter | None,
 ) -> None:
-    _report_progress(progress, "Configuring GitLab Telegram integration.")
-    gitlab_client.configure_telegram_integration(
-        gitlab_project.id,
-        bot_token=config.telegram.bot_token,
-        chat_id=config.telegram.chat_id,
-    )
+    if config.telegram is not None:
+        _report_progress(progress, "Configuring GitLab Telegram integration.")
+        gitlab_client.configure_telegram_integration(
+            gitlab_project.id,
+            bot_token=config.telegram.bot_token,
+            chat_id=config.telegram.chat_id,
+        )
     _report_progress(progress, "Configuring GitLab push mirror.")
     gitlab_client.configure_push_mirror(
         gitlab_project.id,
