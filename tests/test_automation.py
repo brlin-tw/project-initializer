@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from project_initializer.automation import initialize_project
 from project_initializer.config import (
@@ -48,9 +48,34 @@ class AutomationTests(unittest.TestCase):
             progress=progress.append,
         )
 
+        gitlab_client.validate_token.assert_called_once_with()
         self.assertEqual(len(progress), 10)
         self.assertIn("TELEGRAM_CHAT_ID_CI", progress[5])
         self.assertIn("TELEGRAM_BOT_API_TOKEN_CI", progress[6])
+
+    @patch("project_initializer.automation.GitHubClient")
+    @patch("project_initializer.automation.GitLabClient")
+    def test_token_validation_finishes_before_repository_creation(
+        self,
+        gitlab_client_class: object,
+        github_client_class: object,
+    ) -> None:
+        gitlab_client = gitlab_client_class.return_value  # type: ignore[attr-defined]
+        github_client = MagicMock()
+        github_client.get_authenticated_username.return_value = "management-owner"
+        github_mirror_client = MagicMock()
+        github_mirror_client.get_authenticated_username.return_value = "mirror-owner"
+        github_client_class.side_effect = [  # type: ignore[attr-defined]
+            github_client,
+            github_mirror_client,
+        ]
+
+        with self.assertRaisesRegex(ValueError, "must belong to the same account"):
+            initialize_project(_config())
+
+        gitlab_client.validate_token.assert_called_once_with()
+        gitlab_client.create_project.assert_not_called()
+        github_client.create_repository.assert_not_called()
 
 
 def _config() -> InitializerConfig:

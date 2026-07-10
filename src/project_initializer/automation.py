@@ -43,9 +43,20 @@ def initialize_project(
 
     gitlab_client = GitLabClient(config.gitlab.url, config.gitlab.token)
     github_client = GitHubClient(config.github.api_url, config.github.token)
+    github_mirror_client = GitHubClient(
+        config.github.api_url,
+        config.github.mirror_pat,
+    )
 
-    _report_progress(progress, "Querying the authenticated GitHub user.")
+    _report_progress(progress, "Validating GitLab and GitHub access tokens.")
+    gitlab_client.validate_token()
     github_username = github_client.get_authenticated_username()
+    github_mirror_username = github_mirror_client.get_authenticated_username()
+    if github_mirror_username != github_username:
+        raise ValueError(
+            "The GitHub repository management and mirroring tokens must belong "
+            "to the same account.",
+        )
     _report_progress(
         progress,
         f"Creating GitLab project {config.project.identifier}.",

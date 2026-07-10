@@ -48,6 +48,9 @@ The section documents the required permissions and their rationale when applying
 The following fine-grained permissions are required for the GitLab personal access token:
 
 * User
+    + System Access
+        - Personal Access Token
+            * Read: To verify that the GitLab token is active
     + Projects
         - Project
             * Create: To create a new project
@@ -65,6 +68,13 @@ The following fine-grained permissions are required for the GitLab personal acce
 The token's group and project access must include projects created after the
 token was issued so that it can configure the new project's integration and
 remote mirror.
+
+Before creating either repository, the utility verifies that the GitLab token
+is active, that both GitHub tokens authenticate successfully, and that both
+GitHub tokens belong to the same account.  GitLab and GitHub do not provide
+PAT self-inspection APIs that expose all fine-grained permission grants, so the
+remaining permissions cannot be verified without performing the operations
+that require them.
 
 ### GitHub
 

@@ -25,6 +25,22 @@ class GitLabClient:
     def __init__(self, url: str, token: str) -> None:
         self.client = gitlab.Gitlab(url, private_token=token)
 
+    def validate_token(self) -> None:
+        try:
+            token_data = self.client.http_get("/personal_access_tokens/self")
+        except gitlab.GitlabError as error:
+            raise GitLabApiError(
+                f"Unable to validate GitLab token: {error.error_message}",
+            ) from error
+
+        if not isinstance(token_data, dict):
+            raise GitLabApiError(
+                "Unable to validate GitLab token: unexpected API response.",
+            )
+
+        if not token_data.get("active", False):
+            raise GitLabApiError("Unable to validate GitLab token: token is inactive.")
+
     def create_project(
         self,
         *,

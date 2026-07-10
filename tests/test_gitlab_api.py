@@ -6,14 +6,40 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 from project_initializer.gitlab_api import (
+    GitLabApiError,
+    GitLabClient,
     _telegram_integration_attributes,
     build_authenticated_github_push_url,
 )
 
 
 class GitLabApiTests(unittest.TestCase):
+    @patch("project_initializer.gitlab_api.gitlab.Gitlab")
+    def test_validate_token_accepts_active_token(self, gitlab_class: object) -> None:
+        client = GitLabClient("https://gitlab.example.com", "token")
+        gitlab_class.return_value.http_get.return_value = {  # type: ignore[attr-defined]
+            "active": True,
+        }
+
+        client.validate_token()
+
+        gitlab_class.return_value.http_get.assert_called_once_with(  # type: ignore[attr-defined]
+            "/personal_access_tokens/self",
+        )
+
+    @patch("project_initializer.gitlab_api.gitlab.Gitlab")
+    def test_validate_token_rejects_inactive_token(self, gitlab_class: object) -> None:
+        client = GitLabClient("https://gitlab.example.com", "token")
+        gitlab_class.return_value.http_get.return_value = {  # type: ignore[attr-defined]
+            "active": False,
+        }
+
+        with self.assertRaisesRegex(GitLabApiError, "token is inactive"):
+            client.validate_token()
+
     def test_telegram_integration_enables_incident_and_vulnerability_events(
         self,
     ) -> None:
