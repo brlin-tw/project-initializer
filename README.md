@@ -9,13 +9,13 @@ Automate the cumbersome process of creating a new project with a proper structur
 
 Install the utility in a Python virtual environment:
 
-```console
+```bash
 python3 -m pip install --editable .
 ```
 
 Create a local configuration from `project-initializer.example.toml`:
 
-```console
+```bash
 cp project-initializer.example.toml .project-initializer.toml
 ```
 
@@ -24,13 +24,13 @@ will be prompted interactively, and token prompts are hidden.
 
 Validate the planned operations without calling remote APIs:
 
-```console
+```bash
 project-initializer --dry-run
 ```
 
 Run the remote automation:
 
-```console
+```bash
 project-initializer
 ```
 
