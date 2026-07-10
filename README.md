@@ -51,22 +51,20 @@ The following fine-grained permissions are required for the GitLab personal acce
     + Projects
         - Project
             * Create: To create a new project
-            * Read: To read the project's details for determining whether it is already created
 * Group and project
     + Integrations
         - Integration:
-            * Read: To read the integration's details for determining whether it should be recreated
             * Update: To create a new Telegram integration
-    + Repository
-        - Repository
-            * Create: To create a new repository
-            * Read: To read the repository's details
-            * Update: To update the repository's details
     + Project features
         - Remote Mirror
             * Create: To create a new remote mirror
-            * Delete: To delete the previously created remote mirror
-            * Read: To read the remote mirror's details for determining whether it should be recreated
+    + Projects
+        - Project
+            * Read: To retrieve the newly created project before configuring it
+
+The token's group and project access must include projects created after the
+token was issued so that it can configure the new project's integration and
+remote mirror.
 
 ### GitHub
 
@@ -81,7 +79,9 @@ required:
 * Variables: Read and write: To create or update the GitHub Actions repository variable
 * Secrets: Read and write: To create or update the GitHub Actions repository secret
 
-The following fine-grained permissions are required for the GitHub personal access token for repository mirroring:
+The fine-grained personal access token for repository mirroring must also have
+access to all repositories so that it can push to repositories created after
+the token was issued.  The following repository permissions are required:
 
 * Contents: Read and write: To push non-workflow content to the repository
 * Workflows: Read and write: To push workflow content to the repository
