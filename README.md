@@ -38,6 +38,22 @@ Before using the utility, ensure that you have the following:
 
 Refer to the following instructions to use the utility to create a new project on GitLab and GitHub, doing various configurations and mirroring the GitLab repository to GitHub.
 
+### Snap package
+
+Install the snap with:
+
+```bash
+sudo snap install project-initializer
+```
+
+In a directory below your home directory, copy
+`project-initializer.example.toml` to `.project-initializer.toml`, restrict it
+to the account owner with `chmod 600`, and then run `project-initializer` from
+that directory. Use `--config` to select another configuration file accessible
+through the snap's `home` interface.
+
+### Source installation
+
 Note that this applies to the source installation, adapt the flow accordingly if you are using a package manager installation.
 
 1. Download the release archive from the [product releases page](https://gitlab.com/brlin/project-initializer/-/releases) and extract it to a directory of your choice.

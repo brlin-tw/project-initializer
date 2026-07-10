@@ -99,3 +99,6 @@ __pycache__/
 
 # Don't track Python virtual environments
 venv/
+
+# Don't track packaged snaps
+*.snap

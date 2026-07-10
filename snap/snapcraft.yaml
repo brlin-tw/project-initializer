@@ -1,0 +1,28 @@
+# Snapcraft packaging configuration
+#
+# Copyright 2026 林博仁(Buo-ren Lin) <buo.ren.lin@gmail.com>
+# SPDX-License-Identifier: CC-BY-SA-4.0+
+
+name: project-initializer
+base: core24
+version: git
+summary: Automate GitLab and GitHub project setup
+description: |
+  Project Initializer creates and configures matching GitLab and GitHub
+  projects. It can configure repository metadata, Telegram notifications,
+  GitHub Actions values, and GitLab push mirroring.
+
+grade: devel
+confinement: strict
+
+apps:
+  project-initializer:
+    command: bin/project-initializer
+    plugs:
+      - home
+      - network
+
+parts:
+  project-initializer:
+    plugin: python
+    source: .
