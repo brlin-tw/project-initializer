@@ -62,7 +62,7 @@ class ConfigTests(unittest.TestCase):
 
         self.assertEqual(value, "secret-value")
         pwinput.assert_called_once_with(  # type: ignore[attr-defined]
-            "Authentication token: ",
+            "Please enter your Authentication token: ",
             mask="*",
         )
 

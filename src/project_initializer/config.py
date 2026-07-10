@@ -103,6 +103,11 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
             "GitHub authentication token",
             secret=True,
         )
+        github_mirror_pat = _prompt_if_missing(
+            github_mirror_pat,
+            "GitHub personal access token for repository mirroring",
+            secret=True,
+        )
         telegram_chat_id = _prompt_if_missing(
             telegram_chat_id,
             "Telegram channel/group identifier",
@@ -110,11 +115,6 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
         telegram_bot_token = _prompt_if_missing(
             telegram_bot_token,
             "Telegram bot token",
-            secret=True,
-        )
-        github_mirror_pat = _prompt_if_missing(
-            github_mirror_pat,
-            "GitHub personal access token for repository mirroring",
             secret=True,
         )
 
@@ -174,7 +174,7 @@ def _prompt_if_missing(value: Any | None, label: str, *, secret: bool = False) -
     if value not in (None, ""):
         return str(value)
 
-    prompt = f"{label}: "
+    prompt = f"Please enter your {label}: "
     if secret:
         return pwinput(prompt, mask="*")
 
