@@ -5,6 +5,33 @@ Automate the cumbersome process of creating a new project with a proper structur
 <https://gitlab.com/brlin/project-initializer>  
 [![The GitLab CI pipeline status badge of the project's `main` branch](https://gitlab.com/brlin/project-initializer/badges/main/pipeline.svg?ignore_skipped=true "Click here to check out the comprehensive status of the GitLab CI pipelines")](https://gitlab.com/brlin/project-initializer/-/pipelines) [![GitHub Actions workflow status badge](https://github.com/brlin-tw/project-initializer/actions/workflows/check-potential-problems.yml/badge.svg "GitHub Actions workflow status")](https://github.com/brlin-tw/project-initializer/actions/workflows/check-potential-problems.yml) [![pre-commit enabled badge](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white "This project uses pre-commit to check potential problems")](https://pre-commit.com/) [![REUSE Specification compliance badge](https://api.reuse.software/badge/gitlab.com/brlin/project-initializer "This project complies to the REUSE specification to decrease software licensing costs")](https://api.reuse.software/info/gitlab.com/brlin/project-initializer)
 
+## Prerequisites
+
+Before using the utility, ensure that you have the following:
+
+* A POSIX-compatible operating system with Python 3.10 or later, the Python
+  `venv` module, and `pip`.
+* Network access to the configured GitLab and GitHub API endpoints.  The GitLab
+  instance must also be able to reach the Telegram Bot API.
+* A GitLab.com account, or an account on a GitLab 18.10 or later Self-Managed
+  or Dedicated instance.  The account must be allowed to create public
+  projects.
+* A GitLab fine-grained personal access token with the permissions documented
+  in the [GitLab permissions section](#gitlab).
+* A GitHub account that is allowed to create public repositories, plus two
+  fine-grained personal access tokens belonging to that same account:
+    + One token for repository creation and management.
+    + One token for repository mirroring.
+
+  Both tokens must have the repository access and permissions documented in
+  the [GitHub permissions section](#github).
+* A Telegram bot API token and the identifier of the target channel or group.
+  Add the bot to the target chat before running the utility.  For a channel,
+  make the bot an administrator and grant it permission to post messages.
+* A project identifier that is available in both the GitLab and GitHub
+  accounts.  The utility creates new repositories and does not reuse existing
+  ones.
+
 ## Usage
 
 Refer to the following instructions to use the utility to create a new project on GitLab and GitHub, doing various configurations and mirroring the GitLab repository to GitHub.
