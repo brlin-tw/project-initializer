@@ -26,7 +26,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"- {operation}")
             return 0
 
-        result = initialize_project(config)
+        result = initialize_project(config, progress=_print_progress)
     except Exception as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1
@@ -35,6 +35,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"GitLab project: {result.gitlab_project_url}")
     print(f"GitHub repository: {result.github_repository_url}")
     return 0
+
+
+def _print_progress(operation: str) -> None:
+    print(operation, flush=True)
 
 
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
