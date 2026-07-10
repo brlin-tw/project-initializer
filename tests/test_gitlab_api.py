@@ -1,0 +1,30 @@
+# GitLab API helper tests
+#
+# Copyright 2026 林博仁(Buo-ren Lin) <buo.ren.lin@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+from __future__ import annotations
+
+import unittest
+
+from project_initializer.gitlab_api import build_authenticated_github_push_url
+
+
+class GitLabApiTests(unittest.TestCase):
+    def test_build_authenticated_github_push_url_escapes_credentials(self) -> None:
+        url = build_authenticated_github_push_url(
+            owner="owner",
+            repository="repo",
+            username="user@example.com",
+            password="pat:value/with-symbols",
+        )
+
+        self.assertEqual(
+            url,
+            "https://user%40example.com:pat%3Avalue%2Fwith-symbols"
+            "@github.com/owner/repo.git",
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

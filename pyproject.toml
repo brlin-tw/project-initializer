@@ -1,0 +1,31 @@
+# Python project metadata
+#
+# Copyright 2026 林博仁(Buo-ren Lin) <buo.ren.lin@gmail.com>
+# SPDX-License-Identifier: CC-BY-SA-4.0 OR LicenseRef-Apache-2.0-If-Not-Used-In-Template-Projects
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "project-initializer"
+version = "0.1.0"
+description = "Automate GitLab and GitHub project setup."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "AGPL-3.0-or-later"
+authors = [
+    { name = "林博仁(Buo-ren Lin)", email = "buo.ren.lin@gmail.com" }
+]
+dependencies = [
+    "PyNaCl>=1.5",
+    "python-gitlab>=4.13",
+    "requests>=2.31",
+    "tomli>=2.0; python_version < '3.11'"
+]
+
+[project.scripts]
+project-initializer = "project_initializer.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

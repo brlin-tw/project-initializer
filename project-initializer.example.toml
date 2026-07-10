@@ -1,0 +1,27 @@
+# Example project-initializer configuration
+#
+# Copy this file to .project-initializer.toml and fill in non-secret defaults.
+#
+# Copyright 2026 林博仁(Buo-ren Lin) <buo.ren.lin@gmail.com>
+# SPDX-License-Identifier: CC-BY-SA-4.0 OR LicenseRef-Apache-2.0-If-Not-Used-In-Template-Projects
+
+[project]
+identifier = "example-project"
+display_name = "Example Project"
+topics = [
+    "example",
+    "automation"
+]
+
+[gitlab]
+url = "https://gitlab.com"
+# token = "glpat-..."
+
+[github]
+api_url = "https://api.github.com"
+# token = "github_pat_..."
+# mirror_pat = "github_pat_..."
+
+[telegram]
+chat_id = "@example_channel"
+# bot_token = "123456:ABCDEF..."

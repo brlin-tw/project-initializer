@@ -91,4 +91,25 @@ if ! \
 fi
 
 printf \
+    'Info: Installing the local Python project...\n'
+if ! pip install --editable "${project_dir}"; then
+    printf \
+        'Error: Unable to install the local Python project.\n' \
+        1>&2
+    exit 2
+fi
+
+printf \
+    'Info: Running Python unit tests...\n'
+if ! \
+    python3 -m unittest discover \
+        --start-directory "${project_dir}/tests" \
+        --verbose; then
+    printf \
+        'Error: Python unit tests have failed, please verify.\n' \
+        1>&2
+    exit 3
+fi
+
+printf \
     'Info: Operation completed without errors.\n'

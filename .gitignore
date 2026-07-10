@@ -79,6 +79,8 @@
 
 # Don't track compiled Python code caches
 *.pyc
+__pycache__/
+*.egg-info/
 
 # Don't track Vagrant runtime directories
 .vagrant/
