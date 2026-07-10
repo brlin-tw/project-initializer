@@ -5,7 +5,7 @@ Implement a Python utility that prompt the following details:
 * The new project's:
     + Identifier
     + Display name
-    + Topic tags(only lowercase english and dashes)
+    + Topic tags(only lowercase English letters, numbers, and dashes)
 * GitLab authentication token
 * GitHub authentication token
 * Telegram channel/group identifier
