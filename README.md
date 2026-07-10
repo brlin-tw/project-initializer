@@ -7,37 +7,55 @@ Automate the cumbersome process of creating a new project with a proper structur
 
 ## Usage
 
-Install the utility in a Python virtual environment:
+Refer to the following instructions to use the utility to create a new project on GitLab and GitHub, doing various configurations and mirroring the GitLab repository to GitHub.
 
-```bash
-python3 -m pip install --editable .
-```
+Note that this applies to the source installation, adapt the flow accordingly if you are using a package manager installation.
 
-Create a local configuration from `project-initializer.example.toml`:
+1. Download the release archive from the [product releases page](https://gitlab.com/brlin/project-initializer/-/releases) and extract it to a directory of your choice.
+1. Create a local configuration from `project-initializer.example.toml` named `.project-initializer.toml` in the extracted directory.  If you lack any fields, the utility will prompt you for them interactively.
+1. Launch a text terminal.
+1. In the text terminal, run the following command to change the working directory to the extracted directory:
 
-```bash
-cp project-initializer.example.toml .project-initializer.toml
-```
+    ```bash
+    cd /path/to/extracted/directory
+    ```
 
-Fill in non-secret defaults in `.project-initializer.toml`.  Missing values
-will be prompted interactively, and token prompts are hidden.
+   Replace the `/path/to/extracted/directory` placeholder text with the actual path to the extracted directory.
+1. Run the following command to initialize the Python virtual environment:
 
-Validate the planned operations without calling remote APIs:
+    ```bash
+    python3 -m venv venv
+    ```
 
-```bash
-project-initializer --dry-run
-```
+1. Activate the Python virtual environment:
 
-Run the remote automation:
+    ```bash
+    source venv/bin/activate
+    ```
 
-```bash
-project-initializer
-```
+   **NOTE:** This command assumes you are using a Born Again Shell (bash) or a compatible shell.  If you are using a different shell, use another environment activation script in the venv/bin directory or refer to the documentation of your shell for the appropriate command to activate the virtual environment.
+1. Install the utility in a Python virtual environment:
 
-The utility creates public GitLab and GitHub repositories under the
-authenticated token owners, configures Telegram notifications, stores the
-Telegram values in GitHub Actions secrets/variables, and configures GitLab to
-push-mirror to GitHub.
+    ```bash
+    pip install --editable .
+    ```
+
+1. Validate the overall operations:
+
+    ```bash
+    project-initializer --dry-run
+    ```
+
+1. Run the remote automation:
+
+    ```bash
+    project-initializer
+    ```
+
+   The utility creates public GitLab and GitHub repositories under the
+   authenticated token owners, configures Telegram notifications, stores the
+   Telegram values in GitHub Actions secrets/variables, and configures GitLab to
+   push-mirror to GitHub.
 
 ## Required permissions
 
