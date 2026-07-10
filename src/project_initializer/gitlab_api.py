@@ -46,6 +46,7 @@ class GitLabClient:
         *,
         identifier: str,
         display_name: str,
+        description: str,
         topics: tuple[str, ...],
     ) -> GitLabProject:
         try:
@@ -53,6 +54,7 @@ class GitLabClient:
                 {
                     "name": display_name,
                     "path": identifier,
+                    "description": description,
                     "visibility": "public",
                     "topics": list(topics),
                 },

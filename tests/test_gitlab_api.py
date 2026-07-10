@@ -18,6 +18,30 @@ from project_initializer.gitlab_api import (
 
 class GitLabApiTests(unittest.TestCase):
     @patch("project_initializer.gitlab_api.gitlab.Gitlab")
+    def test_create_project_sets_description(self, gitlab_class: object) -> None:
+        project = gitlab_class.return_value.projects.create.return_value  # type: ignore[attr-defined]
+        project.id = 1
+        project.web_url = "https://gitlab.example.com/example/example-project"
+        client = GitLabClient("https://gitlab.example.com", "token")
+
+        client.create_project(
+            identifier="example-project",
+            display_name="Example Project",
+            description="An example project.",
+            topics=("example",),
+        )
+
+        gitlab_class.return_value.projects.create.assert_called_once_with(  # type: ignore[attr-defined]
+            {
+                "name": "Example Project",
+                "path": "example-project",
+                "description": "An example project.",
+                "visibility": "public",
+                "topics": ["example"],
+            },
+        )
+
+    @patch("project_initializer.gitlab_api.gitlab.Gitlab")
     def test_validate_token_accepts_active_token(self, gitlab_class: object) -> None:
         client = GitLabClient("https://gitlab.example.com", "token")
         gitlab_class.return_value.http_get.return_value = {  # type: ignore[attr-defined]

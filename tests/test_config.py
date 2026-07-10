@@ -45,6 +45,7 @@ class ConfigTests(unittest.TestCase):
                     [project]
                     identifier = "example-project"
                     display_name = "Example Project"
+                    description = "An example project."
                     topics = ["example", "automation"]
 
                     [gitlab]
@@ -66,6 +67,7 @@ class ConfigTests(unittest.TestCase):
             config = collect_config(config_path, interactive=False)
 
         self.assertEqual(config.project.identifier, "example-project")
+        self.assertEqual(config.project.description, "An example project.")
         self.assertEqual(config.project.topics, ("example", "automation"))
         self.assertEqual(config.gitlab.url, "https://gitlab.com")
         self.assertEqual(config.github.api_url, "https://api.github.com")

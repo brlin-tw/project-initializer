@@ -29,6 +29,7 @@ DEFAULT_GITHUB_API_URL = "https://api.github.com"
 class ProjectConfig:
     identifier: str
     display_name: str
+    description: str
     topics: tuple[str, ...]
 
 
@@ -90,6 +91,7 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
 
     identifier = _value(project, "identifier")
     display_name = _value(project, "display_name")
+    description = _value(project, "description")
     topics = project.get("topics")
 
     gitlab_url = str(gitlab.get("url", DEFAULT_GITLAB_URL))
@@ -103,6 +105,7 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
     if interactive:
         identifier = _prompt_if_missing(identifier, "Project identifier")
         display_name = _prompt_if_missing(display_name, "Project display name")
+        description = _prompt_if_missing(description, "Project description")
         topics = _prompt_topics_if_missing(topics)
         gitlab_token = _prompt_if_missing(
             gitlab_token,
@@ -133,6 +136,7 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
         {
             "project.identifier": identifier,
             "project.display_name": display_name,
+            "project.description": description,
             "project.topics": topics,
             "gitlab.token": gitlab_token,
             "github.token": github_token,
@@ -150,6 +154,7 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
         project=ProjectConfig(
             identifier=str(identifier),
             display_name=str(display_name),
+            description=str(description),
             topics=_normalize_topics(topics),
         ),
         gitlab=GitLabConfig(url=gitlab_url, token=str(gitlab_token)),

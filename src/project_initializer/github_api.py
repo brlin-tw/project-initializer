@@ -56,11 +56,11 @@ class GitHubClient:
         self,
         *,
         identifier: str,
-        display_name: str,
+        description: str,
     ) -> GitHubRepository:
         payload = {
             "name": identifier,
-            "description": display_name,
+            "description": description,
             "private": False,
             "has_issues": False,
             "has_projects": False,

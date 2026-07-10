@@ -8,6 +8,7 @@
 [project]
 identifier = "example-project"
 display_name = "Example Project"
+description = "An example project created by Project Initializer."
 topics = [
     "example",
     "automation"

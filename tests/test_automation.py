@@ -49,6 +49,16 @@ class AutomationTests(unittest.TestCase):
         )
 
         gitlab_client.validate_token.assert_called_once_with()
+        gitlab_client.create_project.assert_called_once_with(
+            identifier="example-project",
+            display_name="Example Project",
+            description="An example project.",
+            topics=("example",),
+        )
+        github_client.create_repository.assert_called_once_with(
+            identifier="example-project",
+            description="An example project.",
+        )
         self.assertEqual(len(progress), 10)
         self.assertIn("TELEGRAM_CHAT_ID_CI", progress[5])
         self.assertIn("TELEGRAM_BOT_API_TOKEN_CI", progress[6])
@@ -83,6 +93,7 @@ def _config() -> InitializerConfig:
         project=ProjectConfig(
             identifier="example-project",
             display_name="Example Project",
+            description="An example project.",
             topics=("example",),
         ),
         gitlab=GitLabConfig(url="https://gitlab.com", token="gitlab-token"),

@@ -80,7 +80,7 @@ class GitHubApiTests(unittest.TestCase):
 
         repository = client.create_repository(
             identifier="example-project",
-            display_name="Example Project",
+            description="An example project.",
         )
 
         self.assertEqual(repository.owner, "example")
@@ -88,6 +88,7 @@ class GitHubApiTests(unittest.TestCase):
         self.assertEqual(method, "POST")
         self.assertEqual(url, "https://api.github.com/user/repos")
         self.assertEqual(payload["name"], "example-project")
+        self.assertEqual(payload["description"], "An example project.")
         self.assertFalse(payload["private"])
         self.assertFalse(payload["has_issues"])
         self.assertFalse(payload["has_projects"])

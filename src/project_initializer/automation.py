@@ -12,6 +12,7 @@ from project_initializer.config import InitializerConfig
 from project_initializer.github_api import GitHubClient, GitHubRepository
 from project_initializer.gitlab_api import GitLabClient, GitLabProject
 from project_initializer.validation import (
+    validate_description,
     validate_display_name,
     validate_project_identifier,
     validate_topics,
@@ -30,6 +31,7 @@ ProgressReporter = Callable[[str], None]
 def validate_config(config: InitializerConfig) -> None:
     validate_project_identifier(config.project.identifier)
     validate_display_name(config.project.display_name)
+    validate_description(config.project.description)
     validate_topics(config.project.topics)
 
 
@@ -75,6 +77,7 @@ def initialize_project(
     gitlab_project = gitlab_client.create_project(
         identifier=config.project.identifier,
         display_name=config.project.display_name,
+        description=config.project.description,
         topics=config.project.topics,
     )
     _report_progress(
@@ -83,7 +86,7 @@ def initialize_project(
     )
     github_repository = github_client.create_repository(
         identifier=config.project.identifier,
-        display_name=config.project.display_name,
+        description=config.project.description,
     )
 
     _configure_github_repository(

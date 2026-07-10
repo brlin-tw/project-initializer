@@ -44,3 +44,8 @@ def validate_topics(topics: tuple[str, ...]) -> None:
 def validate_display_name(display_name: str) -> None:
     if display_name.strip() == "":
         raise ValueError("Project display name must not be empty.")
+
+
+def validate_description(description: str) -> None:
+    if description.strip() == "":
+        raise ValueError("Project description must not be empty.")

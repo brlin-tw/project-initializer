@@ -8,6 +8,7 @@ from __future__ import annotations
 import unittest
 
 from project_initializer.validation import (
+    validate_description,
     validate_display_name,
     validate_project_identifier,
     validate_topics,
@@ -36,6 +37,10 @@ class ValidationTests(unittest.TestCase):
     def test_rejects_empty_display_name(self) -> None:
         with self.assertRaises(ValueError):
             validate_display_name("   ")
+
+    def test_rejects_empty_description(self) -> None:
+        with self.assertRaises(ValueError):
+            validate_description("   ")
 
 
 if __name__ == "__main__":

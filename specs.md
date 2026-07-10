@@ -5,6 +5,7 @@ Implement a Python utility that prompt the following details:
 * The new project's:
     + Identifier
     + Display name
+    + Description
     + Topic tags(only lowercase English letters, numbers, and dashes)
 * GitLab authentication token
 * GitHub authentication token
@@ -17,10 +18,12 @@ and do the following automation:
 1. Create a new GitLab project with correct:
     + Identifier
     + Display name
+    + Description
     + Topic tags
 1. Create a new GitHub project with correct:
 
     + Identifier
+    + Description
     + Topic tags
 
    without default Git content
