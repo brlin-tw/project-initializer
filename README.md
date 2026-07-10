@@ -39,6 +39,31 @@ authenticated token owners, configures Telegram notifications, stores the
 Telegram values in GitHub Actions secrets/variables, and configures GitLab to
 push-mirror to GitHub.
 
+## Required permissions
+
+The section documents the required permissions and their rationale when applying for the GitLab and GitHub tokens to use with the utility.
+
+### GitLab
+
+The following fine-grained permissions are required for the GitLab personal access token:
+
+* Repository
+    + Repository
+        - Create: To create a new repository
+        - Read: To read the repository's details
+        - Update: To update the repository's details
+* Project features
+    + Remote Mirror
+        - Create: To create a new remote mirror
+        - Delete: To delete the previously created remote mirror
+        - Read: To read the remote mirror's details for determining whether it should be recreated
+
+### GitHub
+
+The following fine-grained permissions are required for the GitHub personal access token:
+
+* Administration: Read and write: To create a new repository, update its details, and add secrets/variables
+
 ## Licensing
 
 Unless otherwise noted([comment headers](https://reuse.software/spec-3.3/#comment-headers)/[REUSE.toml](https://reuse.software/spec-3.3/#reusetoml)), this product is licensed under [the 3.0 version of the GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.html), or any of its more recent versions of your preference.
