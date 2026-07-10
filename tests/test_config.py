@@ -9,8 +9,9 @@ import tempfile
 import textwrap
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from project_initializer.config import collect_config
+from project_initializer.config import _prompt_if_missing, collect_config
 
 
 class ConfigTests(unittest.TestCase):
@@ -54,6 +55,16 @@ class ConfigTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "Missing required"):
                 collect_config(config_path, interactive=False)
+
+    @patch("project_initializer.config.pwinput", return_value="secret-value")
+    def test_secret_prompt_masks_input_with_asterisks(self, pwinput: object) -> None:
+        value = _prompt_if_missing(None, "Authentication token", secret=True)
+
+        self.assertEqual(value, "secret-value")
+        pwinput.assert_called_once_with(  # type: ignore[attr-defined]
+            "Authentication token: ",
+            mask="*",
+        )
 
 
 if __name__ == "__main__":

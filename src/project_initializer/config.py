@@ -6,9 +6,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from getpass import getpass
 from pathlib import Path
 from typing import Any
+
+from pwinput import pwinput
 
 try:
     import tomllib
@@ -175,7 +176,7 @@ def _prompt_if_missing(value: Any | None, label: str, *, secret: bool = False) -
 
     prompt = f"{label}: "
     if secret:
-        return getpass(prompt)
+        return pwinput(prompt, mask="*")
 
     return input(prompt)
 

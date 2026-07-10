@@ -19,6 +19,7 @@ authors = [
 ]
 dependencies = [
     "PyNaCl>=1.5",
+    "pwinput>=1.0.3",
     "python-gitlab>=4.13",
     "requests>=2.31",
     "tomli>=2.0; python_version < '3.11'"
