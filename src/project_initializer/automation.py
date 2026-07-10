@@ -33,6 +33,20 @@ def validate_config(config: InitializerConfig) -> None:
     validate_topics(config.project.topics)
 
 
+def validate_access_tokens(config: InitializerConfig) -> None:
+    gitlab_client = GitLabClient(config.gitlab.url, config.gitlab.token)
+    github_client = GitHubClient(config.github.api_url, config.github.token)
+    github_mirror_client = GitHubClient(
+        config.github.api_url,
+        config.github.mirror_pat,
+    )
+    _validate_access_token_clients(
+        gitlab_client,
+        github_client,
+        github_mirror_client,
+    )
+
+
 def initialize_project(
     config: InitializerConfig,
     *,
@@ -49,14 +63,11 @@ def initialize_project(
     )
 
     _report_progress(progress, "Validating GitLab and GitHub access tokens.")
-    gitlab_client.validate_token()
-    github_username = github_client.get_authenticated_username()
-    github_mirror_username = github_mirror_client.get_authenticated_username()
-    if github_mirror_username != github_username:
-        raise ValueError(
-            "The GitHub repository management and mirroring tokens must belong "
-            "to the same account.",
-        )
+    github_username = _validate_access_token_clients(
+        gitlab_client,
+        github_client,
+        github_mirror_client,
+    )
     _report_progress(
         progress,
         f"Creating GitLab project {config.project.identifier}.",
@@ -95,6 +106,23 @@ def initialize_project(
         gitlab_project_url=gitlab_project.web_url,
         github_repository_url=github_repository.html_url,
     )
+
+
+def _validate_access_token_clients(
+    gitlab_client: GitLabClient,
+    github_client: GitHubClient,
+    github_mirror_client: GitHubClient,
+) -> str:
+    gitlab_client.validate_token()
+    github_username = github_client.get_authenticated_username()
+    github_mirror_username = github_mirror_client.get_authenticated_username()
+    if github_mirror_username != github_username:
+        raise ValueError(
+            "The GitHub repository management and mirroring tokens must belong "
+            "to the same account.",
+        )
+
+    return github_username
 
 
 def describe_dry_run(config: InitializerConfig) -> list[str]:

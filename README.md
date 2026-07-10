@@ -40,7 +40,7 @@ Note that this applies to the source installation, adapt the flow accordingly if
     pip install --editable .
     ```
 
-1. Validate the overall operations:
+1. Validate the configuration and access tokens, then print the planned operations without mutating remote resources:
 
     ```bash
     project-initializer --dry-run

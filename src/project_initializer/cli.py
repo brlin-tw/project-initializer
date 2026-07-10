@@ -9,7 +9,11 @@ import argparse
 import sys
 from pathlib import Path
 
-from project_initializer.automation import describe_dry_run, initialize_project
+from project_initializer.automation import (
+    describe_dry_run,
+    initialize_project,
+    validate_access_tokens,
+)
 from project_initializer.config import DEFAULT_CONFIG_PATH, collect_config
 
 
@@ -22,7 +26,9 @@ def main(argv: list[str] | None = None) -> int:
             interactive=not args.no_interactive,
         )
         if args.dry_run:
-            for operation in describe_dry_run(config):
+            operations = describe_dry_run(config)
+            validate_access_tokens(config)
+            for operation in operations:
                 print(f"- {operation}")
             return 0
 
@@ -57,7 +63,10 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Validate input and print planned operations without API calls.",
+        help=(
+            "Validate input and access tokens, then print planned operations "
+            "without mutating remote resources."
+        ),
     )
     parser.add_argument(
         "--no-interactive",
