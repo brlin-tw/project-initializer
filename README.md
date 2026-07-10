@@ -47,24 +47,39 @@ The section documents the required permissions and their rationale when applying
 
 The following fine-grained permissions are required for the GitLab personal access token:
 
-* Repository
+* User
+    + Projects
+        - Project
+            * Create: To create a new project
+            * Read: To read the project's details for determining whether it is already created
+* Group and project
+    + Integrations
+        - Integration:
+            * Read: To read the integration's details for determining whether it should be recreated
+            * Update: To create a new Telegram integration
     + Repository
-        - Create: To create a new repository
-        - Read: To read the repository's details
-        - Update: To update the repository's details
-* Project features
-    + Remote Mirror
-        - Create: To create a new remote mirror
-        - Delete: To delete the previously created remote mirror
-        - Read: To read the remote mirror's details for determining whether it should be recreated
+        - Repository
+            * Create: To create a new repository
+            * Read: To read the repository's details
+            * Update: To update the repository's details
+    + Project features
+        - Remote Mirror
+            * Create: To create a new remote mirror
+            * Delete: To delete the previously created remote mirror
+            * Read: To read the remote mirror's details for determining whether it should be recreated
 
 ### GitHub
 
 You need two [GitHub personal access tokens (PATs)](https://github.com/settings/personal-access-tokens/new) for the utility, one for repository creation and management, and another for repository mirroring.
 
-The following fine-grained permissions are required for the GitHub personal access token for repository creation and management:
+The fine-grained personal access token for repository creation and management
+must have access to all repositories so that it can configure repositories
+created after the token was issued.  The following repository permissions are
+required:
 
-* Administration: Read and write: To create the mirror repository, update its details, and add secrets/variables
+* Administration: Read and write: To create the mirror repository, update its details, and replace its topics
+* Variables: Read and write: To create or update the GitHub Actions repository variable
+* Secrets: Read and write: To create or update the GitHub Actions repository secret
 
 The following fine-grained permissions are required for the GitHub personal access token for repository mirroring:
 
