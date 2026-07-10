@@ -11,6 +11,7 @@ from typing import Callable
 from project_initializer.config import InitializerConfig
 from project_initializer.github_api import GitHubClient, GitHubRepository
 from project_initializer.gitlab_api import GitLabClient, GitLabProject
+from project_initializer.telegram_api import TelegramClient
 from project_initializer.validation import (
     validate_description,
     validate_display_name,
@@ -47,6 +48,7 @@ def validate_remote_preconditions(config: InitializerConfig) -> None:
         github_client,
         github_mirror_client,
     )
+    _validate_telegram_token(config)
     _validate_project_availability(
         config,
         gitlab_client,
@@ -77,6 +79,7 @@ def initialize_project(
         github_client,
         github_mirror_client,
     )
+    _validate_telegram_token(config)
     _validate_project_availability(
         config,
         gitlab_client,
@@ -140,6 +143,11 @@ def _validate_access_token_clients(
         )
 
     return gitlab_username, github_username
+
+
+def _validate_telegram_token(config: InitializerConfig) -> None:
+    if config.telegram is not None:
+        TelegramClient(config.telegram.bot_token).validate_token()
 
 
 def _validate_project_availability(

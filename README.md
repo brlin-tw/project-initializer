@@ -119,8 +119,9 @@ token was issued so that it can configure the new project's integration and
 remote mirror.
 
 Before creating either repository, the utility verifies that the GitLab token
-is active, that both GitHub tokens authenticate successfully, and that both
-GitHub tokens belong to the same account.  It also verifies that the project
+is active, that both GitHub tokens authenticate successfully, that both GitHub
+tokens belong to the same account, and that the Telegram bot token is valid
+when Telegram integration is configured.  It also verifies that the project
 identifier does not already exist in either account's namespace.  GitLab and
 GitHub do not provide PAT self-inspection APIs that expose all fine-grained
 permission grants, so the remaining permissions cannot be verified without

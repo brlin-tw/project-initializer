@@ -21,12 +21,14 @@ from project_initializer.gitlab_api import GitLabProject
 
 
 class AutomationTests(unittest.TestCase):
+    @patch("project_initializer.automation.TelegramClient")
     @patch("project_initializer.automation.GitHubClient")
     @patch("project_initializer.automation.GitLabClient")
     def test_initialize_project_reports_each_operation(
         self,
         gitlab_client_class: object,
         github_client_class: object,
+        telegram_client_class: object,
     ) -> None:
         gitlab_client = gitlab_client_class.return_value  # type: ignore[attr-defined]
         gitlab_client.validate_token.return_value = "gitlab-owner"
@@ -62,16 +64,20 @@ class AutomationTests(unittest.TestCase):
             identifier="example-project",
             description="An example project.",
         )
+        telegram_client_class.assert_called_once_with("bot-token")  # type: ignore[attr-defined]
+        telegram_client_class.return_value.validate_token.assert_called_once_with()  # type: ignore[attr-defined]
         self.assertEqual(len(progress), 10)
         self.assertIn("TELEGRAM_CHAT_ID_CI", progress[5])
         self.assertIn("TELEGRAM_BOT_API_TOKEN_CI", progress[6])
 
+    @patch("project_initializer.automation.TelegramClient")
     @patch("project_initializer.automation.GitHubClient")
     @patch("project_initializer.automation.GitLabClient")
     def test_token_validation_finishes_before_repository_creation(
         self,
         gitlab_client_class: object,
         github_client_class: object,
+        _telegram_client_class: object,
     ) -> None:
         gitlab_client = gitlab_client_class.return_value  # type: ignore[attr-defined]
         github_client = MagicMock()
@@ -90,12 +96,14 @@ class AutomationTests(unittest.TestCase):
         gitlab_client.create_project.assert_not_called()
         github_client.create_repository.assert_not_called()
 
+    @patch("project_initializer.automation.TelegramClient")
     @patch("project_initializer.automation.GitHubClient")
     @patch("project_initializer.automation.GitLabClient")
     def test_existing_projects_are_reported_before_repository_creation(
         self,
         gitlab_client_class: object,
         github_client_class: object,
+        _telegram_client_class: object,
     ) -> None:
         gitlab_client = gitlab_client_class.return_value  # type: ignore[attr-defined]
         gitlab_client.validate_token.return_value = "gitlab-owner"
@@ -113,12 +121,14 @@ class AutomationTests(unittest.TestCase):
         gitlab_client.create_project.assert_not_called()
         github_client.create_repository.assert_not_called()
 
+    @patch("project_initializer.automation.TelegramClient")
     @patch("project_initializer.automation.GitHubClient")
     @patch("project_initializer.automation.GitLabClient")
     def test_initialize_project_skips_telegram_when_disabled(
         self,
         gitlab_client_class: object,
         github_client_class: object,
+        telegram_client_class: object,
     ) -> None:
         config = _config(telegram=False)
         gitlab_client = gitlab_client_class.return_value  # type: ignore[attr-defined]
@@ -143,6 +153,7 @@ class AutomationTests(unittest.TestCase):
         gitlab_client.configure_telegram_integration.assert_not_called()
         github_client.set_actions_variable.assert_not_called()
         github_client.set_actions_secret.assert_not_called()
+        telegram_client_class.assert_not_called()  # type: ignore[attr-defined]
         self.assertFalse(any("Telegram" in item for item in describe_dry_run(config)))
 
 
