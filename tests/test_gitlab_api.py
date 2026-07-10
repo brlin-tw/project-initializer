@@ -8,6 +8,8 @@ from __future__ import annotations
 import unittest
 from unittest.mock import patch
 
+import gitlab
+
 from project_initializer.gitlab_api import (
     GitLabApiError,
     GitLabClient,
@@ -44,14 +46,17 @@ class GitLabApiTests(unittest.TestCase):
     @patch("project_initializer.gitlab_api.gitlab.Gitlab")
     def test_validate_token_accepts_active_token(self, gitlab_class: object) -> None:
         client = GitLabClient("https://gitlab.example.com", "token")
-        gitlab_class.return_value.http_get.return_value = {  # type: ignore[attr-defined]
-            "active": True,
-        }
+        gitlab_class.return_value.http_get.side_effect = [  # type: ignore[attr-defined]
+            {"active": True},
+            {"username": "example"},
+        ]
 
-        client.validate_token()
+        username = client.validate_token()
 
-        gitlab_class.return_value.http_get.assert_called_once_with(  # type: ignore[attr-defined]
-            "/personal_access_tokens/self",
+        self.assertEqual(username, "example")
+        self.assertEqual(  # type: ignore[attr-defined]
+            gitlab_class.return_value.http_get.call_args_list[1].args,
+            ("/user",),
         )
 
     @patch("project_initializer.gitlab_api.gitlab.Gitlab")
@@ -63,6 +68,20 @@ class GitLabApiTests(unittest.TestCase):
 
         with self.assertRaisesRegex(GitLabApiError, "token is inactive"):
             client.validate_token()
+
+    @patch("project_initializer.gitlab_api.gitlab.Gitlab")
+    def test_project_exists_returns_false_for_not_found(
+        self,
+        gitlab_class: object,
+    ) -> None:
+        gitlab_class.return_value.projects.get.side_effect = (  # type: ignore[attr-defined]
+            gitlab.GitlabGetError("not found", response_code=404)
+        )
+        client = GitLabClient("https://gitlab.example.com", "token")
+
+        exists = client.project_exists("example", "example-project")
+
+        self.assertFalse(exists)
 
     def test_telegram_integration_enables_incident_and_vulnerability_events(
         self,

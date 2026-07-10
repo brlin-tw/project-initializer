@@ -35,17 +35,24 @@ def validate_config(config: InitializerConfig) -> None:
     validate_topics(config.project.topics)
 
 
-def validate_access_tokens(config: InitializerConfig) -> None:
+def validate_remote_preconditions(config: InitializerConfig) -> None:
     gitlab_client = GitLabClient(config.gitlab.url, config.gitlab.token)
     github_client = GitHubClient(config.github.api_url, config.github.token)
     github_mirror_client = GitHubClient(
         config.github.api_url,
         config.github.mirror_pat,
     )
-    _validate_access_token_clients(
+    gitlab_username, github_username = _validate_access_token_clients(
         gitlab_client,
         github_client,
         github_mirror_client,
+    )
+    _validate_project_availability(
+        config,
+        gitlab_client,
+        github_client,
+        gitlab_username,
+        github_username,
     )
 
 
@@ -64,11 +71,18 @@ def initialize_project(
         config.github.mirror_pat,
     )
 
-    _report_progress(progress, "Validating GitLab and GitHub access tokens.")
-    github_username = _validate_access_token_clients(
+    _report_progress(progress, "Validating remote prerequisites.")
+    gitlab_username, github_username = _validate_access_token_clients(
         gitlab_client,
         github_client,
         github_mirror_client,
+    )
+    _validate_project_availability(
+        config,
+        gitlab_client,
+        github_client,
+        gitlab_username,
+        github_username,
     )
     _report_progress(
         progress,
@@ -115,8 +129,8 @@ def _validate_access_token_clients(
     gitlab_client: GitLabClient,
     github_client: GitHubClient,
     github_mirror_client: GitHubClient,
-) -> str:
-    gitlab_client.validate_token()
+) -> tuple[str, str]:
+    gitlab_username = gitlab_client.validate_token()
     github_username = github_client.get_authenticated_username()
     github_mirror_username = github_mirror_client.get_authenticated_username()
     if github_mirror_username != github_username:
@@ -125,7 +139,28 @@ def _validate_access_token_clients(
             "to the same account.",
         )
 
-    return github_username
+    return gitlab_username, github_username
+
+
+def _validate_project_availability(
+    config: InitializerConfig,
+    gitlab_client: GitLabClient,
+    github_client: GitHubClient,
+    gitlab_username: str,
+    github_username: str,
+) -> None:
+    existing_hosts: list[str] = []
+    if gitlab_client.project_exists(gitlab_username, config.project.identifier):
+        existing_hosts.append("GitLab")
+    if github_client.repository_exists(github_username, config.project.identifier):
+        existing_hosts.append("GitHub")
+
+    if existing_hosts:
+        raise ValueError(
+            f'Project "{config.project.identifier}" already exists in '
+            + " and ".join(existing_hosts)
+            + ".",
+        )
 
 
 def describe_dry_run(config: InitializerConfig) -> list[str]:

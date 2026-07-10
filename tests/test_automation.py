@@ -29,12 +29,15 @@ class AutomationTests(unittest.TestCase):
         github_client_class: object,
     ) -> None:
         gitlab_client = gitlab_client_class.return_value  # type: ignore[attr-defined]
+        gitlab_client.validate_token.return_value = "gitlab-owner"
+        gitlab_client.project_exists.return_value = False
         gitlab_client.create_project.return_value = GitLabProject(
             id=1,
             web_url="https://gitlab.com/example/example-project",
         )
         github_client = github_client_class.return_value  # type: ignore[attr-defined]
         github_client.get_authenticated_username.return_value = "example"
+        github_client.repository_exists.return_value = False
         github_client.create_repository.return_value = GitHubRepository(
             owner="example",
             name="example-project",
@@ -84,6 +87,29 @@ class AutomationTests(unittest.TestCase):
             initialize_project(_config())
 
         gitlab_client.validate_token.assert_called_once_with()
+        gitlab_client.create_project.assert_not_called()
+        github_client.create_repository.assert_not_called()
+
+    @patch("project_initializer.automation.GitHubClient")
+    @patch("project_initializer.automation.GitLabClient")
+    def test_existing_projects_are_reported_before_repository_creation(
+        self,
+        gitlab_client_class: object,
+        github_client_class: object,
+    ) -> None:
+        gitlab_client = gitlab_client_class.return_value  # type: ignore[attr-defined]
+        gitlab_client.validate_token.return_value = "gitlab-owner"
+        gitlab_client.project_exists.return_value = True
+        github_client = github_client_class.return_value  # type: ignore[attr-defined]
+        github_client.get_authenticated_username.return_value = "github-owner"
+        github_client.repository_exists.return_value = True
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "already exists in GitLab and GitHub",
+        ):
+            initialize_project(_config())
+
         gitlab_client.create_project.assert_not_called()
         github_client.create_repository.assert_not_called()
 

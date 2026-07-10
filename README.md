@@ -96,6 +96,8 @@ The following fine-grained permissions are required for the GitLab personal acce
     + System Access
         - Personal Access Token
             * Read: To verify that the GitLab token is active
+        - User
+            * Read: To identify the authenticated user's namespace
     + Projects
         - Project
             * Create: To create a new project
@@ -116,10 +118,11 @@ remote mirror.
 
 Before creating either repository, the utility verifies that the GitLab token
 is active, that both GitHub tokens authenticate successfully, and that both
-GitHub tokens belong to the same account.  GitLab and GitHub do not provide
-PAT self-inspection APIs that expose all fine-grained permission grants, so the
-remaining permissions cannot be verified without performing the operations
-that require them.
+GitHub tokens belong to the same account.  It also verifies that the project
+identifier does not already exist in either account's namespace.  GitLab and
+GitHub do not provide PAT self-inspection APIs that expose all fine-grained
+permission grants, so the remaining permissions cannot be verified without
+performing the operations that require them.
 
 ### GitHub
 

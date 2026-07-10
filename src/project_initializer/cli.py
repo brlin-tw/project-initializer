@@ -12,7 +12,7 @@ from pathlib import Path
 from project_initializer.automation import (
     describe_dry_run,
     initialize_project,
-    validate_access_tokens,
+    validate_remote_preconditions,
 )
 from project_initializer.config import DEFAULT_CONFIG_PATH, collect_config
 
@@ -27,7 +27,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         if args.dry_run:
             operations = describe_dry_run(config)
-            validate_access_tokens(config)
+            validate_remote_preconditions(config)
             for operation in operations:
                 print(f"- {operation}")
             return 0

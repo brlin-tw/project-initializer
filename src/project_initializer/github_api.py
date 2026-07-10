@@ -52,6 +52,14 @@ class GitHubClient:
         data = self._expect_json(response, {200}, "query GitHub user")
         return str(data["login"])
 
+    def repository_exists(self, owner: str, repository: str) -> bool:
+        response = self.session.get(f"{self.api_url}/repos/{owner}/{repository}")
+        if response.status_code == 404:
+            return False
+
+        self._expect_status(response, {200}, "check whether GitHub repository exists")
+        return True
+
     def create_repository(
         self,
         *,

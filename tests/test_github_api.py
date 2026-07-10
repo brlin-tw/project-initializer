@@ -59,6 +59,19 @@ class FakeSession:
 
 
 class GitHubApiTests(unittest.TestCase):
+    def test_repository_exists_returns_false_for_not_found(self) -> None:
+        session = FakeSession()
+        session.responses.append(FakeResponse(404))
+        client = GitHubClient(
+            "https://api.github.com",
+            "token",
+            session=session,  # type: ignore[arg-type]
+        )
+
+        exists = client.repository_exists("example", "example-project")
+
+        self.assertFalse(exists)
+
     def test_create_repository_uses_empty_public_repo_settings(self) -> None:
         session = FakeSession()
         session.responses.append(
