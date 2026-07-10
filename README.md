@@ -60,9 +60,16 @@ The following fine-grained permissions are required for the GitLab personal acce
 
 ### GitHub
 
-The following fine-grained permissions are required for the GitHub personal access token:
+You need two [GitHub personal access tokens (PATs)](https://github.com/settings/personal-access-tokens/new) for the utility, one for repository creation and management, and another for repository mirroring.
 
-* Administration: Read and write: To create a new repository, update its details, and add secrets/variables
+The following fine-grained permissions are required for the GitHub personal access token for repository creation and management:
+
+* Administration: Read and write: To create the mirror repository, update its details, and add secrets/variables
+
+The following fine-grained permissions are required for the GitHub personal access token for repository mirroring:
+
+* Contents: Read and write: To push non-workflow content to the repository
+* Workflows: Read and write: To push workflow content to the repository
 
 ## Licensing
 
