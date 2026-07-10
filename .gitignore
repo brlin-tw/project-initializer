@@ -96,3 +96,6 @@ __pycache__/
 
 # Don't track unpacked product files
 /project-initializer-*/
+
+# Don't track Python virtual environments
+venv/
