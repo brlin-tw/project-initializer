@@ -136,6 +136,8 @@ def _telegram_integration_attributes(
         "job_events": True,
         "pipeline_events": True,
         "wiki_page_events": True,
+        "incident_events": True,
+        "vulnerability_events": True,
         "notify_only_broken_pipelines": False,
         "branches_to_be_notified": "all",
     }

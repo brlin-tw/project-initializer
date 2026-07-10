@@ -7,10 +7,24 @@ from __future__ import annotations
 
 import unittest
 
-from project_initializer.gitlab_api import build_authenticated_github_push_url
+from project_initializer.gitlab_api import (
+    _telegram_integration_attributes,
+    build_authenticated_github_push_url,
+)
 
 
 class GitLabApiTests(unittest.TestCase):
+    def test_telegram_integration_enables_incident_and_vulnerability_events(
+        self,
+    ) -> None:
+        attributes = _telegram_integration_attributes(
+            bot_token="bot-token",
+            chat_id="@example",
+        )
+
+        self.assertIs(attributes["incident_events"], True)
+        self.assertIs(attributes["vulnerability_events"], True)
+
     def test_build_authenticated_github_push_url_escapes_credentials(self) -> None:
         url = build_authenticated_github_push_url(
             owner="owner",
