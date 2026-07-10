@@ -5,6 +5,9 @@
 
 from __future__ import annotations
 
+import os
+import stat
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -61,6 +64,14 @@ def load_config_data(path: Path) -> dict[str, Any]:
         return {}
 
     with path.open("rb") as config_file:
+        mode = stat.S_IMODE(os.fstat(config_file.fileno()).st_mode)
+        if mode & (stat.S_IRWXG | stat.S_IRWXO):
+            warnings.warn(
+                f"Configuration file {path} is accessible by group or other users; "
+                "restricting permissions to the owner.",
+                stacklevel=2,
+            )
+        os.fchmod(config_file.fileno(), 0o600)
         loaded = tomllib.load(config_file)
 
     if not isinstance(loaded, dict):

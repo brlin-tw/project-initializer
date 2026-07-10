@@ -5,16 +5,37 @@
 
 from __future__ import annotations
 
+import stat
 import tempfile
 import textwrap
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from project_initializer.config import _prompt_if_missing, collect_config
+from project_initializer.config import (
+    _prompt_if_missing,
+    collect_config,
+    load_config_data,
+)
 
 
 class ConfigTests(unittest.TestCase):
+    def test_loading_config_restricts_file_permissions_to_owner(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "config.toml"
+            config_path.write_text("[project]\n", encoding="utf-8")
+            config_path.chmod(0o644)
+
+            with self.assertWarnsRegex(
+                UserWarning,
+                "accessible by group or other users",
+            ):
+                load_config_data(config_path)
+
+            mode = stat.S_IMODE(config_path.stat().st_mode)
+
+        self.assertEqual(mode, 0o600)
+
     def test_collects_complete_config_without_prompts(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             config_path = Path(temp_dir) / "config.toml"
@@ -40,6 +61,7 @@ class ConfigTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            config_path.chmod(0o600)
 
             config = collect_config(config_path, interactive=False)
 
@@ -52,6 +74,7 @@ class ConfigTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             config_path = Path(temp_dir) / "config.toml"
             config_path.write_text("[project]\n", encoding="utf-8")
+            config_path.chmod(0o600)
 
             with self.assertRaisesRegex(ValueError, "Missing required"):
                 collect_config(config_path, interactive=False)
