@@ -63,7 +63,7 @@ def initialize_project(
     *,
     progress: ProgressReporter | None = None,
 ) -> InitializationResult:
-    _report_progress(progress, "Validating configuration.")
+    _report_progress(progress, "Validating configuration...")
     validate_config(config)
 
     gitlab_client = GitLabClient(config.gitlab.url, config.gitlab.token)
@@ -73,7 +73,7 @@ def initialize_project(
         config.github.mirror_pat,
     )
 
-    _report_progress(progress, "Validating remote prerequisites.")
+    _report_progress(progress, "Validating remote prerequisites...")
     gitlab_username, github_username = _validate_access_token_clients(
         gitlab_client,
         github_client,
@@ -89,7 +89,7 @@ def initialize_project(
     )
     _report_progress(
         progress,
-        f"Creating GitLab project {config.project.identifier}.",
+        f"Creating GitLab project {config.project.identifier}...",
     )
     gitlab_project = gitlab_client.create_project(
         identifier=config.project.identifier,
@@ -99,7 +99,7 @@ def initialize_project(
     )
     _report_progress(
         progress,
-        f"Creating GitHub repository {config.project.identifier}.",
+        f"Creating GitHub repository {config.project.identifier}...",
     )
     github_repository = github_client.create_repository(
         identifier=config.project.identifier,
@@ -205,12 +205,12 @@ def _configure_github_repository(
     config: InitializerConfig,
     progress: ProgressReporter | None,
 ) -> None:
-    _report_progress(progress, "Replacing GitHub repository topics.")
+    _report_progress(progress, "Replacing GitHub repository topics...")
     github_client.replace_topics(repository, config.project.topics)
     if config.telegram is not None:
         _report_progress(
             progress,
-            "Creating or updating GitHub Actions variable TELEGRAM_CHAT_ID_CI.",
+            "Creating or updating GitHub Actions variable TELEGRAM_CHAT_ID_CI...",
         )
         github_client.set_actions_variable(
             repository,
@@ -220,14 +220,14 @@ def _configure_github_repository(
         _report_progress(
             progress,
             "Creating or updating GitHub Actions secret "
-            "TELEGRAM_BOT_API_TOKEN_CI.",
+            "TELEGRAM_BOT_API_TOKEN_CI...",
         )
         github_client.set_actions_secret(
             repository,
             name="TELEGRAM_BOT_API_TOKEN_CI",
             value=config.telegram.bot_token,
         )
-    _report_progress(progress, "Updating GitHub repository details.")
+    _report_progress(progress, "Updating GitHub repository details...")
     github_client.update_repository_details(
         repository,
         homepage=gitlab_project.web_url,
@@ -244,13 +244,13 @@ def _configure_gitlab_project(
     progress: ProgressReporter | None,
 ) -> None:
     if config.telegram is not None:
-        _report_progress(progress, "Configuring GitLab Telegram integration.")
+        _report_progress(progress, "Configuring GitLab Telegram integration...")
         gitlab_client.configure_telegram_integration(
             gitlab_project.id,
             bot_token=config.telegram.bot_token,
             chat_id=config.telegram.chat_id,
         )
-    _report_progress(progress, "Configuring GitLab push mirror.")
+    _report_progress(progress, "Configuring GitLab push mirror...")
     gitlab_client.configure_push_mirror(
         gitlab_project.id,
         github_owner=github_repository.owner,
