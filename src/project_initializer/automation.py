@@ -109,6 +109,7 @@ def initialize_project(
     github_repository = github_client.create_repository(
         identifier=config.project.identifier,
         description=config.project.description,
+        organization=config.github.organization,
     )
 
     _configure_github_repository(
@@ -167,10 +168,15 @@ def _validate_project_availability(
         if config.gitlab.namespace is not None
         else gitlab_username
     )
+    github_owner = (
+        config.github.organization
+        if config.github.organization is not None
+        else github_username
+    )
     existing_hosts: list[str] = []
     if gitlab_client.project_exists(gitlab_namespace, config.project.identifier):
         existing_hosts.append("GitLab")
-    if github_client.repository_exists(github_username, config.project.identifier):
+    if github_client.repository_exists(github_owner, config.project.identifier):
         existing_hosts.append("GitHub")
 
     if existing_hosts:
@@ -183,11 +189,16 @@ def _validate_project_availability(
 
 def describe_dry_run(config: InitializerConfig) -> list[str]:
     validate_config(config)
+    github_scope = (
+        f" in organization {config.github.organization}"
+        if config.github.organization is not None
+        else ""
+    )
     operations = [
         "Validate project identifier, display name, and topics.",
         f"Create public GitLab project {config.project.identifier}.",
         "Create public empty GitHub repository "
-        f"{config.project.identifier} with issues, projects, wiki, and pull "
+        f"{config.project.identifier}{github_scope} with issues, projects, wiki, and pull "
         "requests disabled.",
         "Replace GitHub repository topics.",
         "Configure GitLab push mirror to the GitHub repository.",

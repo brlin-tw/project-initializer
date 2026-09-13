@@ -45,6 +45,7 @@ class GitHubConfig:
     api_url: str
     token: str
     mirror_pat: str
+    organization: str | None = None
 
 
 @dataclass(frozen=True)
@@ -102,6 +103,7 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
     github_api_url = str(github.get("api_url", DEFAULT_GITHUB_API_URL))
     github_token = _value(github, "token")
     github_mirror_pat = _value(github, "mirror_pat")
+    github_organization = _value(github, "organization")
     telegram_chat_id = _value(telegram, "chat_id")
     telegram_bot_token = _value(telegram, "bot_token")
 
@@ -118,6 +120,10 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
             gitlab_token,
             "GitLab authentication token",
             secret=True,
+        )
+        github_organization = _prompt_if_missing(
+            github_organization,
+            "GitHub organization to operate on (optional)",
         )
         github_token = _prompt_if_missing(
             github_token,
@@ -185,6 +191,12 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
             api_url=github_api_url.rstrip("/"),
             token=str(github_token),
             mirror_pat=str(github_mirror_pat),
+            organization=(
+                str(github_organization).strip()
+                if github_organization not in (None, "")
+                and str(github_organization).strip() != ""
+                else None
+            ),
         ),
         telegram=(
             TelegramConfig(

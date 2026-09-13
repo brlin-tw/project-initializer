@@ -72,6 +72,7 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(config.gitlab.url, "https://gitlab.com")
         self.assertIsNone(config.gitlab.namespace)
         self.assertEqual(config.github.api_url, "https://api.github.com")
+        self.assertIsNone(config.github.organization)
 
     def test_collects_gitlab_namespace_when_provided(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -101,6 +102,35 @@ class ConfigTests(unittest.TestCase):
             config = collect_config(config_path, interactive=False)
 
         self.assertEqual(config.gitlab.namespace, "my-custom-group")
+
+    def test_collects_github_organization_when_provided(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [project]
+                    identifier = "example-project"
+                    display_name = "Example Project"
+                    description = "An example project."
+                    topics = ["example"]
+
+                    [gitlab]
+                    token = "gitlab-token"
+
+                    [github]
+                    organization = "my-custom-org"
+                    token = "github-token"
+                    mirror_pat = "mirror-token"
+                    """,
+                ),
+                encoding="utf-8",
+            )
+            config_path.chmod(0o600)
+
+            config = collect_config(config_path, interactive=False)
+
+        self.assertEqual(config.github.organization, "my-custom-org")
 
     def test_reports_missing_values_when_not_interactive(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -189,6 +219,7 @@ class ConfigTests(unittest.TestCase):
                     token = "gitlab-token"
 
                     [github]
+                    organization = "existing-org"
                     token = "github-token"
                     mirror_pat = "mirror-token"
                     """,
@@ -222,6 +253,7 @@ class ConfigTests(unittest.TestCase):
                     token = "gitlab-token"
 
                     [github]
+                    organization = "existing-org"
                     token = "github-token"
                     mirror_pat = "mirror-token"
                     """,
@@ -234,6 +266,78 @@ class ConfigTests(unittest.TestCase):
 
         self.assertIsNone(config.gitlab.namespace)
         mock_input.assert_called_once_with("Please enter your GitLab namespace to operate on: ")
+
+    @patch("project_initializer.config.input", return_value="interactive-org")
+    def test_interactive_prompt_for_github_organization_uses_entered_value(
+        self,
+        mock_input: object,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [project]
+                    identifier = "example-project"
+                    display_name = "Example Project"
+                    description = "An example project."
+                    topics = ["example"]
+
+                    [gitlab]
+                    namespace = "existing-group"
+                    token = "gitlab-token"
+
+                    [github]
+                    token = "github-token"
+                    mirror_pat = "mirror-token"
+                    """,
+                ),
+                encoding="utf-8",
+            )
+            config_path.chmod(0o600)
+
+            config = collect_config(config_path, interactive=True)
+
+        self.assertEqual(config.github.organization, "interactive-org")
+        mock_input.assert_called_once_with(
+            "Please enter your GitHub organization to operate on (optional): ",
+        )
+
+    @patch("project_initializer.config.input", return_value="")
+    def test_interactive_prompt_for_github_organization_defaults_to_none_when_empty(
+        self,
+        mock_input: object,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [project]
+                    identifier = "example-project"
+                    display_name = "Example Project"
+                    description = "An example project."
+                    topics = ["example"]
+
+                    [gitlab]
+                    namespace = "existing-group"
+                    token = "gitlab-token"
+
+                    [github]
+                    token = "github-token"
+                    mirror_pat = "mirror-token"
+                    """,
+                ),
+                encoding="utf-8",
+            )
+            config_path.chmod(0o600)
+
+            config = collect_config(config_path, interactive=True)
+
+        self.assertIsNone(config.github.organization)
+        mock_input.assert_called_once_with(
+            "Please enter your GitHub organization to operate on (optional): ",
+        )
 
     @patch("project_initializer.config.pwinput", return_value="secret-value")
     def test_secret_prompt_masks_input_with_asterisks(self, pwinput: object) -> None:

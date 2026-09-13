@@ -73,6 +73,7 @@ class GitHubClient:
         *,
         identifier: str,
         description: str,
+        organization: str | None = None,
     ) -> GitHubRepository:
         payload = {
             "name": identifier,
@@ -85,8 +86,15 @@ class GitHubClient:
             "auto_init": False,
             "has_downloads": True,
         }
-        response = self.session.post(f"{self.api_url}/user/repos", json=payload)
-        data = self._expect_json(response, {201}, "create GitHub repository")
+        if organization is not None:
+            url = f"{self.api_url}/orgs/{organization}/repos"
+            operation = f"create GitHub repository in organization {organization}"
+        else:
+            url = f"{self.api_url}/user/repos"
+            operation = "create GitHub repository"
+
+        response = self.session.post(url, json=payload)
+        data = self._expect_json(response, {201}, operation)
         owner = str(data["owner"]["login"])
         return GitHubRepository(
             owner=owner,

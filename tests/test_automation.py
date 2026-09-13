@@ -64,6 +64,7 @@ class AutomationTests(unittest.TestCase):
         github_client.create_repository.assert_called_once_with(
             identifier="example-project",
             description="An example project.",
+            organization=None,
         )
         telegram_client_class.assert_called_once_with("bot-token")  # type: ignore[attr-defined]
         telegram_client_class.return_value.validate_token.assert_called_once_with()  # type: ignore[attr-defined]
@@ -200,10 +201,54 @@ class AutomationTests(unittest.TestCase):
         telegram_client_class.assert_not_called()  # type: ignore[attr-defined]
         self.assertFalse(any("Telegram" in item for item in describe_dry_run(config)))
 
+    @patch("project_initializer.automation.TelegramClient")
+    @patch("project_initializer.automation.GitHubClient")
+    @patch("project_initializer.automation.GitLabClient")
+    def test_initialize_project_with_github_organization(
+        self,
+        gitlab_client_class: object,
+        github_client_class: object,
+        _telegram_client_class: object,
+    ) -> None:
+        gitlab_client = gitlab_client_class.return_value  # type: ignore[attr-defined]
+        gitlab_client.validate_token.return_value = "gitlab-owner"
+        gitlab_client.project_exists.return_value = False
+        gitlab_client.create_project.return_value = GitLabProject(
+            id=1,
+            web_url="https://gitlab.com/example/example-project",
+        )
+        github_client = github_client_class.return_value  # type: ignore[attr-defined]
+        github_client.get_authenticated_username.return_value = "example"
+        github_client.repository_exists.return_value = False
+        github_client.create_repository.return_value = GitHubRepository(
+            owner="my-org",
+            name="example-project",
+            html_url="https://github.com/my-org/example-project",
+            clone_url="https://github.com/my-org/example-project.git",
+        )
+
+        config = _config(organization="my-org", telegram=False)
+        initialize_project(config)
+
+        github_client.repository_exists.assert_called_once_with(
+            "my-org",
+            "example-project",
+        )
+        github_client.create_repository.assert_called_once_with(
+            identifier="example-project",
+            description="An example project.",
+            organization="my-org",
+        )
+        dry_run = describe_dry_run(config)
+        self.assertTrue(
+            any("in organization my-org" in item for item in dry_run),
+        )
+
 
 def _config(
     *,
     namespace: str | None = None,
+    organization: str | None = None,
     telegram: bool = True,
 ) -> InitializerConfig:
     return InitializerConfig(
@@ -222,6 +267,7 @@ def _config(
             api_url="https://api.github.com",
             token="github-token",
             mirror_pat="mirror-token",
+            organization=organization,
         ),
         telegram=(
             TelegramConfig(chat_id="@example", bot_token="bot-token")

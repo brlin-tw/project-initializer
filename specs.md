@@ -9,6 +9,7 @@ Implement a Python utility that prompt the following details:
     + Topic tags(only lowercase English letters, numbers, and dashes)
 * GitLab namespace(optional, default to the authenticated user's namespace)
 * GitLab authentication token
+* GitHub organization(optional, default to the authenticated user's personal account)
 * GitHub authentication token
 * Telegram channel/group identifier
 * Telegram bot token
@@ -27,6 +28,7 @@ and do the following automation:
     + Identifier
     + Description
     + Topic tags
+    + Target organization(if specified)
 
    without default Git content
 1. For the GitHub project, disable the following features:

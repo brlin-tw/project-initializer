@@ -21,6 +21,7 @@ url = "https://gitlab.com"
 
 [github]
 api_url = "https://api.github.com"
+# organization = "example-organization"
 # token = "github_pat_..."
 # mirror_pat = "github_pat_..."
 

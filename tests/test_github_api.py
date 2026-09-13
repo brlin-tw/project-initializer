@@ -138,6 +138,43 @@ class GitHubApiTests(unittest.TestCase):
         self.assertFalse(payload["has_wiki"])
         self.assertFalse(payload["auto_init"])
 
+    def test_create_repository_in_organization_uses_org_endpoint(self) -> None:
+        session = FakeSession()
+        session.responses.append(
+            FakeResponse(
+                201,
+                {
+                    "name": "example-project",
+                    "html_url": "https://github.com/example-org/example-project",
+                    "clone_url": "https://github.com/example-org/example-project.git",
+                    "owner": {"login": "example-org"},
+                },
+            ),
+        )
+        client = GitHubClient(
+            "https://api.github.com",
+            "token",
+            session=session,  # type: ignore[arg-type]
+        )
+
+        repository = client.create_repository(
+            identifier="example-project",
+            description="An example project.",
+            organization="example-org",
+        )
+
+        self.assertEqual(repository.owner, "example-org")
+        method, url, payload = session.requests[0]
+        self.assertEqual(method, "POST")
+        self.assertEqual(url, "https://api.github.com/orgs/example-org/repos")
+        self.assertEqual(payload["name"], "example-project")
+        self.assertEqual(payload["description"], "An example project.")
+        self.assertFalse(payload["private"])
+        self.assertFalse(payload["has_issues"])
+        self.assertFalse(payload["has_projects"])
+        self.assertFalse(payload["has_wiki"])
+        self.assertFalse(payload["auto_init"])
+
     def test_actions_variable_creation_falls_back_to_update_on_conflict(self) -> None:
         session = FakeSession()
         session.responses.extend([FakeResponse(409), FakeResponse(204)])
