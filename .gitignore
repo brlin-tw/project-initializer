@@ -102,3 +102,6 @@ venv/
 
 # Don't track packaged snaps
 *.snap
+
+# Don't track build artifacts
+/build/
