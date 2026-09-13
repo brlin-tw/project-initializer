@@ -37,6 +37,7 @@ class ProjectConfig:
 class GitLabConfig:
     url: str
     token: str
+    namespace: str | None = None
 
 
 @dataclass(frozen=True)
@@ -97,6 +98,7 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
 
     gitlab_url = str(gitlab.get("url", DEFAULT_GITLAB_URL))
     gitlab_token = _value(gitlab, "token")
+    gitlab_namespace = _value(gitlab, "namespace")
     github_api_url = str(github.get("api_url", DEFAULT_GITHUB_API_URL))
     github_token = _value(github, "token")
     github_mirror_pat = _value(github, "mirror_pat")
@@ -108,6 +110,10 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
         display_name = _prompt_if_missing(display_name, "Project display name")
         description = _prompt_if_missing(description, "Project description")
         topics = _prompt_topics_if_missing(topics)
+        gitlab_namespace = _prompt_if_missing(
+            gitlab_namespace,
+            "GitLab namespace to operate on",
+        )
         gitlab_token = _prompt_if_missing(
             gitlab_token,
             "GitLab authentication token",
@@ -165,7 +171,16 @@ def collect_config(path: Path, *, interactive: bool = True) -> InitializerConfig
             description=str(description),
             topics=_normalize_topics(topics),
         ),
-        gitlab=GitLabConfig(url=gitlab_url, token=str(gitlab_token)),
+        gitlab=GitLabConfig(
+            url=gitlab_url,
+            token=str(gitlab_token),
+            namespace=(
+                str(gitlab_namespace).strip()
+                if gitlab_namespace not in (None, "")
+                and str(gitlab_namespace).strip() != ""
+                else None
+            ),
+        ),
         github=GitHubConfig(
             api_url=github_api_url.rstrip("/"),
             token=str(github_token),

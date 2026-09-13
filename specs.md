@@ -7,6 +7,7 @@ Implement a Python utility that prompt the following details:
     + Display name
     + Description
     + Topic tags(only lowercase English letters, numbers, and dashes)
+* GitLab namespace(optional, default to the authenticated user's namespace)
 * GitLab authentication token
 * GitHub authentication token
 * Telegram channel/group identifier
@@ -20,6 +21,7 @@ and do the following automation:
     + Display name
     + Description
     + Topic tags
+    + Target namespace(if specified)
 1. Create a new GitHub project with correct:
 
     + Identifier

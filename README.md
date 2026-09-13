@@ -111,6 +111,9 @@ The section documents the required permissions and their rationale when applying
 The following fine-grained permissions are required for the GitLab personal access token:
 
 * User
+    + Groups
+        - Namespace
+            * Read: To retrieve the namespace ID for project creation
     + System Access
         - Personal Access Token
             * Read: To verify that the GitLab token is active

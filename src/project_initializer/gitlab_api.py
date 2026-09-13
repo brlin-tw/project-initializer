@@ -68,6 +68,17 @@ class GitLabClient:
 
         return True
 
+    def get_namespace_id(self, namespace: str) -> int:
+        try:
+            namespace_obj = self.client.namespaces.get(namespace)
+        except gitlab.GitlabError as error:
+            raise GitLabApiError(
+                f'Unable to query GitLab namespace "{namespace}": '
+                f"{error.error_message}",
+            ) from error
+
+        return int(namespace_obj.id)
+
     def create_project(
         self,
         *,
@@ -75,17 +86,20 @@ class GitLabClient:
         display_name: str,
         description: str,
         topics: tuple[str, ...],
+        namespace_id: int | None = None,
     ) -> GitLabProject:
+        payload: dict[str, object] = {
+            "name": display_name,
+            "path": identifier,
+            "description": description,
+            "visibility": "public",
+            "topics": list(topics),
+        }
+        if namespace_id is not None:
+            payload["namespace_id"] = namespace_id
+
         try:
-            project = self.client.projects.create(
-                {
-                    "name": display_name,
-                    "path": identifier,
-                    "description": description,
-                    "visibility": "public",
-                    "topics": list(topics),
-                },
-            )
+            project = self.client.projects.create(payload)
         except gitlab.GitlabError as error:
             raise GitLabApiError(
                 f"Unable to create GitLab project: {error.error_message}",
