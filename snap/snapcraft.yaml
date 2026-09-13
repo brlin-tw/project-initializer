@@ -26,3 +26,7 @@ parts:
   project-initializer:
     plugin: python
     source: .
+
+    build-packages:
+      # Required for building cffi wheel on armhf and riscv64 platforms
+      - libffi-dev
