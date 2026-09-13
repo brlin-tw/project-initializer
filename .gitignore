@@ -98,7 +98,7 @@ __pycache__/
 /project-initializer-*/
 
 # Don't track Python virtual environments
-venv/
+/.venv/
 
 # Don't track packaged snaps
 *.snap

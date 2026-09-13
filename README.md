@@ -69,16 +69,16 @@ Note that this applies to the source installation, adapt the flow accordingly if
 1. Run the following command to initialize the Python virtual environment:
 
     ```bash
-    python3 -m venv venv
+    python3 -m venv .venv
     ```
 
 1. Activate the Python virtual environment:
 
     ```bash
-    source venv/bin/activate
+    source .venv/bin/activate
     ```
 
-   **NOTE:** This command assumes you are using a Born Again Shell (bash) or a compatible shell.  If you are using a different shell, use another environment activation script in the venv/bin directory or refer to the documentation of your shell for the appropriate command to activate the virtual environment.
+   **NOTE:** This command assumes you are using a Born Again Shell (bash) or a compatible shell.  If you are using a different shell, use another environment activation script in the .venv/bin directory or refer to the documentation of your shell for the appropriate command to activate the virtual environment.
 1. Install the utility in a Python virtual environment:
 
     ```bash
