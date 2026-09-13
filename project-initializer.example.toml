@@ -16,6 +16,7 @@ topics = [
 
 [gitlab]
 url = "https://gitlab.com"
+# namespace = "example-namespace"
 # token = "glpat-..."
 
 [github]

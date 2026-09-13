@@ -59,6 +59,7 @@ class AutomationTests(unittest.TestCase):
             display_name="Example Project",
             description="An example project.",
             topics=("example",),
+            namespace_id=None,
         )
         github_client.create_repository.assert_called_once_with(
             identifier="example-project",
@@ -69,6 +70,49 @@ class AutomationTests(unittest.TestCase):
         self.assertEqual(len(progress), 10)
         self.assertIn("TELEGRAM_CHAT_ID_CI", progress[5])
         self.assertIn("TELEGRAM_BOT_API_TOKEN_CI", progress[6])
+
+    @patch("project_initializer.automation.TelegramClient")
+    @patch("project_initializer.automation.GitHubClient")
+    @patch("project_initializer.automation.GitLabClient")
+    def test_initialize_project_with_custom_namespace(
+        self,
+        gitlab_client_class: object,
+        github_client_class: object,
+        _telegram_client_class: object,
+    ) -> None:
+        gitlab_client = gitlab_client_class.return_value  # type: ignore[attr-defined]
+        gitlab_client.validate_token.return_value = "gitlab-owner"
+        gitlab_client.get_namespace_id.return_value = 42
+        gitlab_client.project_exists.return_value = False
+        gitlab_client.create_project.return_value = GitLabProject(
+            id=1,
+            web_url="https://gitlab.com/my-custom-group/example-project",
+        )
+        github_client = github_client_class.return_value  # type: ignore[attr-defined]
+        github_client.get_authenticated_username.return_value = "example"
+        github_client.repository_exists.return_value = False
+        github_client.create_repository.return_value = GitHubRepository(
+            owner="example",
+            name="example-project",
+            html_url="https://github.com/example/example-project",
+            clone_url="https://github.com/example/example-project.git",
+        )
+
+        config = _config(namespace="my-custom-group", telegram=False)
+        initialize_project(config)
+
+        gitlab_client.project_exists.assert_called_once_with(
+            "my-custom-group",
+            "example-project",
+        )
+        gitlab_client.get_namespace_id.assert_called_once_with("my-custom-group")
+        gitlab_client.create_project.assert_called_once_with(
+            identifier="example-project",
+            display_name="Example Project",
+            description="An example project.",
+            topics=("example",),
+            namespace_id=42,
+        )
 
     @patch("project_initializer.automation.TelegramClient")
     @patch("project_initializer.automation.GitHubClient")
@@ -157,7 +201,11 @@ class AutomationTests(unittest.TestCase):
         self.assertFalse(any("Telegram" in item for item in describe_dry_run(config)))
 
 
-def _config(*, telegram: bool = True) -> InitializerConfig:
+def _config(
+    *,
+    namespace: str | None = None,
+    telegram: bool = True,
+) -> InitializerConfig:
     return InitializerConfig(
         project=ProjectConfig(
             identifier="example-project",
@@ -165,7 +213,11 @@ def _config(*, telegram: bool = True) -> InitializerConfig:
             description="An example project.",
             topics=("example",),
         ),
-        gitlab=GitLabConfig(url="https://gitlab.com", token="gitlab-token"),
+        gitlab=GitLabConfig(
+            url="https://gitlab.com",
+            token="gitlab-token",
+            namespace=namespace,
+        ),
         github=GitHubConfig(
             api_url="https://api.github.com",
             token="github-token",

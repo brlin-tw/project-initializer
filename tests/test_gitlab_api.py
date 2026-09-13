@@ -44,6 +44,58 @@ class GitLabApiTests(unittest.TestCase):
         )
 
     @patch("project_initializer.gitlab_api.gitlab.Gitlab")
+    def test_create_project_includes_namespace_id_when_provided(
+        self,
+        gitlab_class: object,
+    ) -> None:
+        project = gitlab_class.return_value.projects.create.return_value  # type: ignore[attr-defined]
+        project.id = 1
+        project.web_url = "https://gitlab.example.com/group/example-project"
+        client = GitLabClient("https://gitlab.example.com", "token")
+
+        client.create_project(
+            identifier="example-project",
+            display_name="Example Project",
+            description="An example project.",
+            topics=("example",),
+            namespace_id=42,
+        )
+
+        gitlab_class.return_value.projects.create.assert_called_once_with(  # type: ignore[attr-defined]
+            {
+                "name": "Example Project",
+                "path": "example-project",
+                "description": "An example project.",
+                "visibility": "public",
+                "topics": ["example"],
+                "namespace_id": 42,
+            },
+        )
+
+    @patch("project_initializer.gitlab_api.gitlab.Gitlab")
+    def test_get_namespace_id_returns_id(self, gitlab_class: object) -> None:
+        namespace_obj = gitlab_class.return_value.namespaces.get.return_value  # type: ignore[attr-defined]
+        namespace_obj.id = 42
+        client = GitLabClient("https://gitlab.example.com", "token")
+
+        namespace_id = client.get_namespace_id("my-group")
+
+        self.assertEqual(namespace_id, 42)
+        gitlab_class.return_value.namespaces.get.assert_called_once_with(  # type: ignore[attr-defined]
+            "my-group",
+        )
+
+    @patch("project_initializer.gitlab_api.gitlab.Gitlab")
+    def test_get_namespace_id_raises_on_error(self, gitlab_class: object) -> None:
+        gitlab_class.return_value.namespaces.get.side_effect = (  # type: ignore[attr-defined]
+            gitlab.GitlabGetError("not found", response_code=404)
+        )
+        client = GitLabClient("https://gitlab.example.com", "token")
+
+        with self.assertRaisesRegex(GitLabApiError, 'Unable to query GitLab namespace "my-group"'):
+            client.get_namespace_id("my-group")
+
+    @patch("project_initializer.gitlab_api.gitlab.Gitlab")
     def test_validate_token_accepts_active_token(self, gitlab_class: object) -> None:
         client = GitLabClient("https://gitlab.example.com", "token")
         gitlab_class.return_value.http_get.side_effect = [  # type: ignore[attr-defined]

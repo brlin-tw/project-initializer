@@ -87,6 +87,10 @@ def initialize_project(
         gitlab_username,
         github_username,
     )
+    gitlab_namespace_id: int | None = None
+    if config.gitlab.namespace is not None:
+        gitlab_namespace_id = gitlab_client.get_namespace_id(config.gitlab.namespace)
+
     _report_progress(
         progress,
         f"Creating GitLab project {config.project.identifier}...",
@@ -96,6 +100,7 @@ def initialize_project(
         display_name=config.project.display_name,
         description=config.project.description,
         topics=config.project.topics,
+        namespace_id=gitlab_namespace_id,
     )
     _report_progress(
         progress,
@@ -157,8 +162,13 @@ def _validate_project_availability(
     gitlab_username: str,
     github_username: str,
 ) -> None:
+    gitlab_namespace = (
+        config.gitlab.namespace
+        if config.gitlab.namespace is not None
+        else gitlab_username
+    )
     existing_hosts: list[str] = []
-    if gitlab_client.project_exists(gitlab_username, config.project.identifier):
+    if gitlab_client.project_exists(gitlab_namespace, config.project.identifier):
         existing_hosts.append("GitLab")
     if github_client.repository_exists(github_username, config.project.identifier):
         existing_hosts.append("GitHub")
