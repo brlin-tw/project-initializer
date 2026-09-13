@@ -5,7 +5,7 @@
 
 name: project-initializer
 base: core24
-version: git
+adopt-info: project-initializer
 summary: Automate GitLab and GitHub project setup
 description: |
   Project Initializer creates and configures matching GitLab and GitHub
@@ -27,7 +27,42 @@ parts:
   project-initializer:
     plugin: python
     source: .
-
     build-packages:
+      # For determining the snap version from the Git repository
+      - git
+
       # Required for building cffi wheel on armhf and riscv64 platforms
       - libffi-dev
+
+    override-pull: |
+      if ! set -u; then
+        printf \
+          'Error: Unable to set the nounset script interpreter behavior.' \
+          1>&2
+        exit 1
+      fi
+
+      if ! craftctl default; then
+        printf 'Error: Unable to execute the default pull step.' 1>&2
+        exit 1
+      fi
+
+      if ! git_describe_raw="$(
+        git -C "${CRAFT_PROJECT_DIR}" describe \
+          --always \
+          --tags \
+          --dirty
+        )"; then
+        printf 'Error: Unable to describe the Git repository.' 1>&2
+        exit 1
+      fi
+
+      snap_version="${git_describe_raw#v}"
+      if ! craftctl set version="${snap_version}"; then
+        printf 'Error: Unable to set the snap version.' 1>&2
+        exit 1
+      fi
+
+      printf \
+        'Info: Snap version determined to be "%s".\n' \
+        "${snap_version}"
