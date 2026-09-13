@@ -34,30 +34,24 @@ Before using the utility, ensure that you have the following:
   accounts.  The utility creates new repositories and does not reuse existing
   ones.
 
-## Usage
+## Installation
 
-Refer to the following instructions to use the utility to create a new project on GitLab and GitHub, doing various configurations and mirroring the GitLab repository to GitHub.
+The following installation options are available:
 
 ### Snap package
 
-Install the snap with:
+Install the application on snap-enabled systems by running the following command in a text terminal:
 
 ```bash
 sudo snap install project-initializer
 ```
 
-In a directory below your home directory, copy
-`project-initializer.example.toml` to `.project-initializer.toml`, restrict it
-to the account owner with `chmod 600`, and then run `project-initializer` from
-that directory. Use `--config` to select another configuration file accessible
-through the snap's `home` interface.
-
 ### Source installation
 
-Note that this applies to the source installation, adapt the flow accordingly if you are using a package manager installation.
+Refer to the following instructions to install the utility from a source
+tree (or from a Git checkout):
 
 1. Download the release archive from the [product releases page](https://gitlab.com/brlin/project-initializer/-/releases) and extract it to a directory of your choice.
-1. Create a local configuration from `project-initializer.example.toml` named `.project-initializer.toml` in the extracted directory.  If you lack any fields, the utility will prompt you for them interactively.
 1. Launch a text terminal.
 1. In the text terminal, run the following command to change the working directory to the extracted directory:
 
@@ -72,26 +66,64 @@ Note that this applies to the source installation, adapt the flow accordingly if
     python3 -m venv .venv
     ```
 
+   If you're using [uv](https://docs.astral.sh/uv/), run the following command instead:
+
+    ```bash
+    uv venv
+    ```
+
 1. Activate the Python virtual environment:
 
     ```bash
-    source .venv/bin/activate
+    source /path/to/extracted/directory/.venv/bin/activate
     ```
 
-   **NOTE:** This command assumes you are using a Born Again Shell (bash) or a compatible shell.  If you are using a different shell, use another environment activation script in the .venv/bin directory or refer to the documentation of your shell for the appropriate command to activate the virtual environment.
+   Replace the `/path/to/extracted/directory` placeholder text with the actual path to the extracted directory.
+
+   **NOTE:** This command assumes you are using a Born Again Shell (bash) or a compatible shell.  If you are using a different shell, use another environment activation script in the /path/to/extracted/directory/.venv/bin directory or refer to the documentation of your shell for the appropriate command to activate the virtual environment.
 1. Install the utility in a Python virtual environment:
 
     ```bash
-    pip install --editable .
+    pip install --editable /path/to/extracted/directory
     ```
 
-1. Validate the configuration and access tokens, then print the planned operations without mutating remote resources:
+   If you're using [uv](https://docs.astral.sh/uv/), run the following command instead:
+
+    ```bash
+    uv pip install -e /path/to/extracted/directory
+    ```
+
+   Replace the `/path/to/extracted/directory` placeholder text with the actual path to the extracted directory.
+
+## Usage
+
+Refer to the following instructions to use the utility to create a new project on GitLab and GitHub, doing various configurations and mirroring the GitLab repository to GitHub:
+
+1. (If you're using a source installation) Activate the Python virtual environment by running the following command:
+
+    ```bash
+    source /path/to/extracted/directory/.venv/bin/activate
+    ```
+
+   Replace the `/path/to/extracted/directory` placeholder text with the actual path to the extracted directory.
+1. Create a `.project-initializer.toml` configuration file from [the project-initializer.example.toml sample file](project-initializer.example.toml) in your project folder(or any accessible directory of your choice).  If you lack any fields, the utility will prompt you for them interactively.
+
+   Refer to [the Required permissions](#required-permissions) section for the necessary GitLab and GitHub token permissions to set-up.
+1. Launch a text terminal.
+1. Run the following command to switch the working directory to the location of the `.project-initializer.toml` configuration file:
+
+    ```bash
+    cd /path/to/directory/containing/.project-initializer.toml
+    ```
+
+   Replace the `/path/to/directory/containing/.project-initializer.toml` placeholder text with the actual path to the directory containing the `.project-initializer.toml` configuration file.
+1. Run the following command to validate the configuration and access tokens, then print the planned operations without mutating remote resources:
 
     ```bash
     project-initializer --dry-run
     ```
 
-1. Run the remote automation:
+1. Run the following command to execute the remote automation:
 
     ```bash
     project-initializer
