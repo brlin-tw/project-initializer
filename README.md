@@ -46,6 +46,13 @@ Install the application on snap-enabled systems by running the following command
 sudo snap install project-initializer
 ```
 
+If your projects are under the `/mnt`, `/media`, and `/run/media` directories,
+run the following command to enable access to these directories from the snap:
+
+```bash
+sudo snap connect project-initializer:removable-media
+```
+
 ### Source installation
 
 Refer to the following instructions to install the utility from a source

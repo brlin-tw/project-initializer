@@ -21,6 +21,7 @@ apps:
     plugs:
       - home
       - network
+      - removable-media
 
 parts:
   project-initializer:
