@@ -57,7 +57,7 @@ class GitLabClient:
 
     def project_exists(self, namespace: str, identifier: str) -> bool:
         try:
-            self.client.projects.get(f"{namespace}/{identifier}")
+            project = self.client.projects.get(f"{namespace}/{identifier}")
         except gitlab.GitlabGetError as error:
             if error.response_code == 404:
                 return False
@@ -65,6 +65,24 @@ class GitLabClient:
                 f"Unable to check whether GitLab project exists: "
                 f"{error.error_message}",
             ) from error
+
+        path_with_namespace = getattr(project, "path_with_namespace", None)
+        if (
+            isinstance(path_with_namespace, str)
+            and path_with_namespace.lower() != f"{namespace}/{identifier}".lower()
+        ):
+            return False
+
+        path = getattr(project, "path", None)
+        if isinstance(path, str) and path.lower() != identifier.lower():
+            return False
+
+        attributes = getattr(project, "attributes", None)
+        if (
+            isinstance(attributes, dict)
+            and attributes.get("marked_for_deletion_at") is not None
+        ):
+            return False
 
         return True
 

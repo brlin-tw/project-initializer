@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import gitlab
 
@@ -129,6 +129,54 @@ class GitLabApiTests(unittest.TestCase):
         gitlab_class.return_value.projects.get.side_effect = (  # type: ignore[attr-defined]
             gitlab.GitlabGetError("not found", response_code=404)
         )
+        client = GitLabClient("https://gitlab.example.com", "token")
+
+        exists = client.project_exists("example", "example-project")
+
+        self.assertFalse(exists)
+
+    @patch("project_initializer.gitlab_api.gitlab.Gitlab")
+    def test_project_exists_returns_true_for_matching_project(
+        self,
+        gitlab_class: object,
+    ) -> None:
+        project = MagicMock()
+        project.path = "example-project"
+        project.path_with_namespace = "example/example-project"
+        project.attributes = {"marked_for_deletion_at": None}
+        gitlab_class.return_value.projects.get.return_value = project  # type: ignore[attr-defined]
+        client = GitLabClient("https://gitlab.example.com", "token")
+
+        exists = client.project_exists("example", "example-project")
+
+        self.assertTrue(exists)
+
+    @patch("project_initializer.gitlab_api.gitlab.Gitlab")
+    def test_project_exists_returns_false_for_redirect_target(
+        self,
+        gitlab_class: object,
+    ) -> None:
+        project = MagicMock()
+        project.path = "renamed-project"
+        project.path_with_namespace = "example/renamed-project"
+        project.attributes = {}
+        gitlab_class.return_value.projects.get.return_value = project  # type: ignore[attr-defined]
+        client = GitLabClient("https://gitlab.example.com", "token")
+
+        exists = client.project_exists("example", "example-project")
+
+        self.assertFalse(exists)
+
+    @patch("project_initializer.gitlab_api.gitlab.Gitlab")
+    def test_project_exists_returns_false_for_project_marked_for_deletion(
+        self,
+        gitlab_class: object,
+    ) -> None:
+        project = MagicMock()
+        project.path = "example-project"
+        project.path_with_namespace = "example/example-project"
+        project.attributes = {"marked_for_deletion_at": "2026-09-13"}
+        gitlab_class.return_value.projects.get.return_value = project  # type: ignore[attr-defined]
         client = GitLabClient("https://gitlab.example.com", "token")
 
         exists = client.project_exists("example", "example-project")

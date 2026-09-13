@@ -57,7 +57,15 @@ class GitHubClient:
         if response.status_code == 404:
             return False
 
-        self._expect_status(response, {200}, "check whether GitHub repository exists")
+        data = self._expect_json(
+            response,
+            {200},
+            "check whether GitHub repository exists",
+        )
+        name = data.get("name")
+        if isinstance(name, str) and name.lower() != repository.lower():
+            return False
+
         return True
 
     def create_repository(

@@ -72,6 +72,36 @@ class GitHubApiTests(unittest.TestCase):
 
         self.assertFalse(exists)
 
+    def test_repository_exists_returns_true_for_matching_repository(self) -> None:
+        session = FakeSession()
+        session.responses.append(
+            FakeResponse(200, payload={"name": "example-project"}),
+        )
+        client = GitHubClient(
+            "https://api.github.com",
+            "token",
+            session=session,  # type: ignore[arg-type]
+        )
+
+        exists = client.repository_exists("example", "example-project")
+
+        self.assertTrue(exists)
+
+    def test_repository_exists_returns_false_for_redirect_target(self) -> None:
+        session = FakeSession()
+        session.responses.append(
+            FakeResponse(200, payload={"name": "renamed-project"}),
+        )
+        client = GitHubClient(
+            "https://api.github.com",
+            "token",
+            session=session,  # type: ignore[arg-type]
+        )
+
+        exists = client.repository_exists("example", "example-project")
+
+        self.assertFalse(exists)
+
     def test_create_repository_uses_empty_public_repo_settings(self) -> None:
         session = FakeSession()
         session.responses.append(
