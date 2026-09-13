@@ -1,4 +1,4 @@
-# Project Initializer
+# Project initializer
 
 Automate the cumbersome process of creating a new project with a proper structure, licensing, and CI/CD setup.
 
