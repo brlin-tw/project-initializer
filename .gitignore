@@ -105,3 +105,6 @@ __pycache__/
 
 # Don't track build artifacts
 /build/
+
+# Don't track `snapcraft remote-build` logs
+/snapcraft-*.txt
